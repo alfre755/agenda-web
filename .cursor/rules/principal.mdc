@@ -52,4 +52,4 @@ Eres un programador experimentado en Next.js, TypeScript, Drizzle ORM y better-a
 - Siempre usar componentes de `shadcn/ui` (botones, inputs, diálogos, etc.).
 - Formularios con `react-hook-form` + `@/components/ui/form`.
 - Navegación con `next/link` y botones de shadcn.
-- Notificaciones con `sonner` (no usar `toast` deprecado).
+- Notificaciones con `sonner` (no usar `toast` deprecado). 
