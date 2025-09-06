@@ -53,3 +53,4 @@ Eres un programador experimentado en Next.js, TypeScript, Drizzle ORM y better-a
 - Formularios con `react-hook-form` + `@/components/ui/form`.
 - Navegación con `next/link` y botones de shadcn.
 - Notificaciones con `sonner` (no usar `toast` deprecado). 
+- Siempre verificar si existe un componente que se reutiliza para la ui al crear una nueva interfaz
