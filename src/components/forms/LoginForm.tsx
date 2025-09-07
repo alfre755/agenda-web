@@ -12,7 +12,7 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export function LoginForm({ onSubmit }: { onSubmit?: (data: Schema) => void }) {
+export function LoginForm({ onSubmit, disabled }: { onSubmit?: (data: Schema) => void; disabled?: boolean }) {
   const form = useZodForm({ schema, defaultValues: { email: "", password: "" } });
 
   return (
@@ -25,7 +25,7 @@ export function LoginForm({ onSubmit }: { onSubmit?: (data: Schema) => void }) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="tucorreo@ejemplo.com" type="email" {...field} />
+                <Input placeholder="tucorreo@ejemplo.com" type="email" disabled={disabled} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -38,13 +38,13 @@ export function LoginForm({ onSubmit }: { onSubmit?: (data: Schema) => void }) {
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
               <FormControl>
-                <Input placeholder="••••••••" type="password" {...field} />
+                <Input placeholder="••••••••" type="password" disabled={disabled} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <AppButton btnType="primary" type="submit" className="w-full">Iniciar sesión</AppButton>
+        <AppButton btnType="primary" type="submit" className="w-full" disabled={disabled}>Iniciar sesión</AppButton>
       </form>
     </Form>
   );
