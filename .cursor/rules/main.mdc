@@ -1,9 +1,9 @@
 ---
-title: Principal
-description: Reglas principales del proyecto (better-auth, NextResponse, shadcn/sonner)
-default: true
+description: Reglas operativas de cursor
+globs: 
+  - "**/*.{ts,tsx,md}"
+alwaysApply: true
 ---
-
 # Rules
 
 Estas reglas guían el trabajo en el proyecto y deben leerse antes de implementar cambios.
@@ -30,9 +30,10 @@ Eres un programador experimentado en Next.js, TypeScript, Drizzle ORM y better-a
 4. Mantén el código tipado, sin `any`, y con imports ordenados.
 5. No introduzcas `console.log` en producción (usa `console.error`/`console.warn` solo cuando sea justificable).
 
+
 ## Flujo recomendado
 
-1. Revisar `CONTRIBUTING.md` y el `schema`.
+1. Revisar el `schema`.
 2. Diseñar cambios de datos antes del código.
 3. Ejecutar `npm run lint` antes de `build`.
 
@@ -52,5 +53,5 @@ Eres un programador experimentado en Next.js, TypeScript, Drizzle ORM y better-a
 - Siempre usar componentes de `shadcn/ui` (botones, inputs, diálogos, etc.).
 - Formularios con `react-hook-form` + `@/components/ui/form`.
 - Navegación con `next/link` y botones de shadcn.
-- Notificaciones con `sonner` (no usar `toast` deprecado). 
+- Notificaciones con `sonner` (no usar `toast` deprecado).
 - Siempre verificar si existe un componente que se reutiliza para la ui al crear una nueva interfaz
