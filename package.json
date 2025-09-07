@@ -9,7 +9,7 @@
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "prebuild": "npm run lint",
-    "seed:user": "node -r dotenv/config --loader tsx scripts/create-initial-user.ts"
+    "seed:user": "tsx --env-file .env scripts/create-initial-user.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
