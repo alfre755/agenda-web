@@ -20,7 +20,17 @@ export function useAuth() {
 
   async function signInWithEmail(params: SignInEmailParams) {
     const { email, password, callbackURL } = params;
-    return authClient.signIn.email({ email, password, callbackURL });
+    return authClient.signIn.email(
+      { email, password, callbackURL },
+      {
+        onError: (ctx) => {
+          if (ctx.error?.status === 403) {
+            // Email no verificado, mostrar mensaje en UI si se requiere
+            console.warn("Email no verificado");
+          }
+        },
+      }
+    );
   }
 
   async function signUpWithEmail(params: SignUpEmailParams) {
@@ -42,6 +52,7 @@ export function useAuth() {
     return authClient.getSession();
   }
 
+
   const isAuthenticated = useMemo(() => Boolean(session?.user?.id), [session]);
 
   return {
@@ -53,5 +64,8 @@ export function useAuth() {
     signUpWithEmail,
     signOut,
     refreshSession,
+    sendVerificationEmail: authClient.sendVerificationEmail,
+    requestPasswordReset: authClient.requestPasswordReset,
+    resetPassword: authClient.resetPassword,
   } as const;
 }

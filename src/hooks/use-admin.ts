@@ -6,7 +6,7 @@ export function useAdmin() {
     return authClient.admin.listUsers(params as any);
   }
 
-  async function createUser(payload: { name: string; email: string; password?: string; image?: string; role?: string }) {
+  async function createUser(payload: { name: string; email: string; password: string; image?: string; role?: string | string[]; data?: Record<string, any> }) {
     // Si better-auth expone admin.createUser, úsalo; si no, recurre a signUp con flujo admin
     // Placeholder:
     // @ts-expect-error - dependiendo de la versión
@@ -20,11 +20,28 @@ export function useAdmin() {
     return { data: null, error: { message: "updateUser no disponible" } } as const;
   }
 
-  async function deleteUser(userId: string) {
+  async function removeUser(input: { userId: string }) {
     // @ts-expect-error
-    if (authClient.admin?.deleteUser) return authClient.admin.deleteUser(userId);
-    return { data: null, error: { message: "deleteUser no disponible" } } as const;
+    if (authClient.admin?.removeUser) return authClient.admin.removeUser(input);
+    return { data: null, error: { message: "removeUser no disponible" } } as const;
   }
 
-  return { listUsers, createUser, updateUser, deleteUser } as const;
+  // Alias por compatibilidad si en algún lugar se usa deleteUser
+  async function deleteUser(userId: string) {
+    return removeUser({ userId });
+  }
+
+  async function setRole(input: { userId: string; role: string | string[] }) {
+    // @ts-expect-error
+    if (authClient.admin?.setRole) return authClient.admin.setRole(input);
+    return { data: null, error: { message: "setRole no disponible" } } as const;
+  }
+
+  async function setUserPassword(input: { userId: string; newPassword: string }) {
+    // @ts-expect-error
+    if (authClient.admin?.setUserPassword) return authClient.admin.setUserPassword(input);
+    return { data: null, error: { message: "setUserPassword no disponible" } } as const;
+  }
+
+  return { listUsers, createUser, updateUser, removeUser, deleteUser, setRole, setUserPassword } as const;
 }
