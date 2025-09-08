@@ -1,11 +1,15 @@
 "use client"
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon, Settings, Users, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppButton } from "@/components/AppButton";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/hooks/use-auth";
+import { authClient } from "@/lib/auth-client";
+import { useUsers } from "@/hooks/use-users";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: CalendarIcon },
@@ -17,7 +21,12 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const { currentUser, hasRole } = useUsers();
 
   return (
     <aside className={cn("border-r h-[calc(100vh-56px)] sticky top-[56px] bg-background transition-[width] duration-200", collapsed ? "w-16" : "w-64")}> 
@@ -39,10 +48,30 @@ export function Sidebar() {
       <nav className="py-2">
         <ul className="space-y-1">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            // Role-based visibility: superadmin/admin all modules; user limited
+            const isSuperAdmin = hasRole("superadmin");
+            const isAdmin = hasRole("admin");
+            const isUser = hasRole("user") && !isAdmin && !isSuperAdmin;
+
+            if (isUser) {
+              const allowed = href === "/dashboard" || href === "/calendar" || href === "/settings";
+              if (!allowed) return null;
+            }
+            // Simple resource-permission mapping for visibility
+            const required = (
+              href === "/users" ? { user: ["list"] } :
+              href === "/organizations" ? { organization: ["list"] } :
+              href === "/calendar" ? { calendar: ["list"] } :
+              undefined
+            );
+            // If a mapping exists, check permission on client plugin
+            if (required && !authClient.admin.checkRolePermission({ permissions: required, role: (typeof window !== "undefined" ? undefined : undefined) as any })) {
+              // We can't synchronously know user role here; prefer to show and guard server-side or fetch role from session.
+            }
             const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
             return (
               <li key={href}>
-                <Link href={href} className={cn(
+                <Link href={href} prefetch={false} className={cn(
                   "mx-2 flex items-center gap-3 rounded px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
                   active ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                 )}>
@@ -54,6 +83,35 @@ export function Sidebar() {
           })}
         </ul>
       </nav>
+      <div className="mt-auto p-2 border-t">
+        <AppButton
+          btnType="ghost"
+          type="button"
+          className="w-full justify-start px-3 py-2 text-sm"
+          onClick={() => setConfirmLogoutOpen(true)}
+        >
+          Cerrar sesión
+        </AppButton>
+      </div>
+      <ConfirmDialog
+        open={confirmLogoutOpen}
+        onOpenChange={setConfirmLogoutOpen}
+        title="¿Cerrar sesión?"
+        description="Se cerrará tu sesión actual."
+        confirmText={loggingOut ? "Saliendo..." : "Cerrar sesión"}
+        isLoading={loggingOut}
+        onConfirm={async () => {
+          try {
+            setLoggingOut(true);
+            await signOut();
+          } catch (_) {
+          } finally {
+            setLoggingOut(false);
+            setConfirmLogoutOpen(false);
+            router.push("/home");
+          }
+        }}
+      />
     </aside>
   );
 }

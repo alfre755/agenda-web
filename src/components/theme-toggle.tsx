@@ -5,14 +5,14 @@ import { Moon, Sun } from "lucide-react";
 import { AppButton } from "@/components/AppButton";
 
 export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isDark = resolvedTheme === "dark";
+  const isDark = (resolvedTheme ?? theme) === "dark";
 
   return (
     <AppButton
@@ -22,11 +22,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="p-2"
     >
-      {mounted ? (
-        isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
-      ) : (
-        <span className="inline-block h-5 w-5" />
-      )}
+      {mounted ? (isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <span className="inline-block h-5 w-5" />}
     </AppButton>
   );
 }

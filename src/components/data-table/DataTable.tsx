@@ -12,16 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useState } from "react";
 
 export type Column<T> = {
@@ -51,6 +42,10 @@ export type DataTableProps<T> = {
   onEditRow?: (row: T) => void;
   onDeleteRow?: (row: T) => void;
   actionsHeader?: string;
+  useBuiltInDeleteConfirm?: boolean;
+  showViewAction?: boolean;
+  showEditAction?: boolean;
+  showDeleteAction?: boolean;
 };
 
 export function DataTable<T extends Record<string, any>>({
@@ -72,6 +67,10 @@ export function DataTable<T extends Record<string, any>>({
   onEditRow,
   onDeleteRow,
   actionsHeader = "Settings",
+  useBuiltInDeleteConfirm = true,
+  showViewAction = true,
+  showEditAction = true,
+  showDeleteAction = true,
 }: DataTableProps<T>) {
   const canPrev = offset > 0;
   const canNext = total != null ? offset + limit < total : rows.length >= limit;
@@ -192,9 +191,18 @@ export function DataTable<T extends Record<string, any>>({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => (onViewRow ? onViewRow(row) : toast.info("Ver no implementado"))}>Ver</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => (onEditRow ? onEditRow(row) : toast.info("Editar no implementado"))}>Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setRowToDelete(row); setConfirmOpen(true); }}>Eliminar</DropdownMenuItem>
+                        {showViewAction && (
+                          <DropdownMenuItem onClick={() => (onViewRow ? onViewRow(row) : toast.info("Ver no implementado"))}>Ver</DropdownMenuItem>
+                        )}
+                        {showEditAction && (
+                          <DropdownMenuItem onClick={() => (onEditRow ? onEditRow(row) : toast.info("Editar no implementado"))}>Editar</DropdownMenuItem>
+                        )}
+                        {showDeleteAction && (
+                          <DropdownMenuItem onClick={() => {
+                          if (useBuiltInDeleteConfirm) { setRowToDelete(row); setConfirmOpen(true); }
+                          else { onDeleteRow?.(row); }
+                        }}>Eliminar</DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -243,7 +251,10 @@ export function DataTable<T extends Record<string, any>>({
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => (onViewRow ? onViewRow(row) : toast.info("Ver no implementado"))}>Ver</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => (onEditRow ? onEditRow(row) : toast.info("Editar no implementado"))}>Editar</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => (onDeleteRow ? onDeleteRow(row) : toast.info("Eliminar no implementado"))}>Eliminar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              if (useBuiltInDeleteConfirm) { setRowToDelete(row); setConfirmOpen(true); }
+                              else { onDeleteRow?.(row); }
+                            }}>Eliminar</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -255,6 +266,20 @@ export function DataTable<T extends Record<string, any>>({
           </table>
         </div>
       </div>
+
+      {useBuiltInDeleteConfirm && (
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title="¿Eliminar registro?"
+          description="Esta acción no se puede deshacer. El registro será eliminado permanentemente."
+          confirmText={isDeleting ? "Eliminando..." : "Eliminar"}
+          onConfirm={handleConfirmDelete}
+          isLoading={isDeleting}
+        />
+      )}
     </div>
   );
 }
+
+//
