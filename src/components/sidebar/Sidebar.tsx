@@ -3,33 +3,28 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, Settings, Users, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Users, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppButton } from "@/components/AppButton";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuth } from "@/hooks/use-auth";
+// ThemeToggle solo en top bar
 import { authClient } from "@/lib/auth-client";
 import { useUsers } from "@/hooks/use-users";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+// Perfil/Dropdown solo en top bar
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: CalendarIcon },
   { href: "/organizations", label: "Organizaciones", icon: Building2 },
   { href: "/users", label: "Usuarios", icon: Users },
   { href: "/calendar", label: "Calendario", icon: CalendarIcon },
-  { href: "/settings", label: "Ajustes", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
   const { currentUser, hasRole } = useUsers();
 
   return (
-    <aside className={cn("border-r h-[calc(100vh-56px)] sticky top-[56px] bg-background transition-[width] duration-200", collapsed ? "w-16" : "w-64")}> 
+    <aside className={cn("border-r h-[calc(100vh-56px)] sticky top-[56px] bg-background transition-[width] duration-200", collapsed ? "w-16" : "w-72")}> 
       <div className="p-2 border-b flex items-center gap-2">
         <AppButton
           btnType="secondary"
@@ -41,9 +36,7 @@ export function Sidebar() {
           {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </AppButton>
         <span className={cn("font-semibold text-sm", collapsed && "sr-only")}>Agenda Centralizada</span>
-        <div className="ml-auto">
-          <ThemeToggle />
-        </div>
+        <div className="ml-auto" />
       </div>
       <nav className="py-2">
         <ul className="space-y-1">
@@ -83,35 +76,7 @@ export function Sidebar() {
           })}
         </ul>
       </nav>
-      <div className="mt-auto p-2 border-t">
-        <AppButton
-          btnType="ghost"
-          type="button"
-          className="w-full justify-start px-3 py-2 text-sm"
-          onClick={() => setConfirmLogoutOpen(true)}
-        >
-          Cerrar sesión
-        </AppButton>
-      </div>
-      <ConfirmDialog
-        open={confirmLogoutOpen}
-        onOpenChange={setConfirmLogoutOpen}
-        title="¿Cerrar sesión?"
-        description="Se cerrará tu sesión actual."
-        confirmText={loggingOut ? "Saliendo..." : "Cerrar sesión"}
-        isLoading={loggingOut}
-        onConfirm={async () => {
-          try {
-            setLoggingOut(true);
-            await signOut();
-          } catch (_) {
-          } finally {
-            setLoggingOut(false);
-            setConfirmLogoutOpen(false);
-            router.push("/home");
-          }
-        }}
-      />
+      {/* Área inferior limpia */}
     </aside>
   );
 }
