@@ -15,6 +15,13 @@
       "when": 1756787539329,
       "tag": "0001_calm_aaron_stack",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757466534034,
+      "tag": "0002_happy_giant_man",
+      "breakpoints": true
     }
   ]
 }
