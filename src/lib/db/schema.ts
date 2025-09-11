@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, json } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -131,6 +131,90 @@ export const event = pgTable("event", {
   createdById: text("created_by_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+// Configuración de horarios de la organización
+export const organizationSchedule = pgTable("organization_schedule", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  dayOfWeek: integer("day_of_week").notNull(), // 0 = Domingo, 1 = Lunes, etc.
+  startTime: text("start_time").notNull(), // "08:00"
+  endTime: text("end_time").notNull(), // "18:00"
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+// Servicios que ofrece la organización
+export const service = pgTable("service", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  duration: integer("duration").notNull(), // Duración en minutos
+  price: integer("price"), // Precio en centavos
+  color: text("color").default("#3b82f6"),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+// Citas/Reservas
+export const appointment = pgTable("appointment", {
+  id: text("id").primaryKey(),
+  serviceId: text("service_id")
+    .notNull()
+    .references(() => service.id, { onDelete: "cascade" }),
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email").notNull(),
+  clientPhone: text("client_phone"),
+  start: timestamp("start").notNull(),
+  end: timestamp("end").notNull(),
+  status: text("status").default("confirmed").notNull(), // confirmed, cancelled, completed
+  notes: text("notes"),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  createdById: text("created_by_id")
+    .references(() => user.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+// Configuración de disponibilidad (horarios especiales, días libres, etc.)
+export const availability = pgTable("availability", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // "blocked", "special_hours", "break"
+  title: text("title").notNull(),
+  start: timestamp("start").notNull(),
+  end: timestamp("end").notNull(),
+  isRecurring: boolean("is_recurring").default(false).notNull(),
+  recurringPattern: json("recurring_pattern"), // Para horarios recurrentes
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

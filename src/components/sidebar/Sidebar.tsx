@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, Users, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Users, Building2, ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { AppButton } from "@/components/AppButton";
 // ThemeToggle solo en top bar
 import { authClient } from "@/lib/auth-client";
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: "/organizations", label: "Organizaciones", icon: Building2 },
   { href: "/users", label: "Usuarios", icon: Users },
   { href: "/calendar", label: "Calendario", icon: CalendarIcon },
+  { href: "/scheduling", label: "Agendamiento", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -47,7 +48,7 @@ export function Sidebar() {
             const isUser = hasRole("user") && !isAdmin && !isSuperAdmin;
 
             if (isUser) {
-              const allowed = href === "/dashboard" || href === "/calendar" || href === "/settings";
+              const allowed = href === "/dashboard" || href === "/calendar" || href === "/scheduling" || href === "/settings";
               if (!allowed) return null;
             }
             // Simple resource-permission mapping for visibility
