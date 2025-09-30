@@ -5,7 +5,7 @@ export default function DashboardPage() {
       <div className="w-full">
         <iframe
           title="Lista P y Backorder"
-          src="https://app.powerbi.com/view?r=eyJrIjoiNDIyNmJhY2YtZjBkYy00OGRjLWI5YTItMjFmNzlmZWZlNmM1IiwidCI6IjY5OWEwNzlmLTk3ODItNDMzNy1hMTUxLTg3MDhiMDBkOTA2ZSJ9"
+          src="https://app.powerbi.com/view?r=eyJrIjoiYjY1YjRhMmQtYzJhMC00NDc4LTlhMDgtYzE3MmFhMDVkNWUyIiwidCI6IjY5OWEwNzlmLTk3ODItNDMzNy1hMTUxLTg3MDhiMDBkOTA2ZSJ9"
           allowFullScreen
           className="w-full h-[600px] rounded border"
         />
