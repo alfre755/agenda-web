@@ -1,12 +1,12 @@
 "use client"
 import { useAuth } from "@/hooks/use-auth";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { AppButton } from "@/components/AppButton";
 import { toast } from "sonner";
 
-export default function VerifyEmailPage() {
+function VerifyEmailForm() {
   const { sendVerificationEmail } = useAuth();
   const params = useSearchParams();
   const initialEmail = params.get("email") || "";
@@ -44,5 +44,20 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm space-y-4">
+          <h1 className="text-2xl font-semibold tracking-tight">Verificar email</h1>
+          <p className="text-sm text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <VerifyEmailForm />
+    </Suspense>
   );
 }

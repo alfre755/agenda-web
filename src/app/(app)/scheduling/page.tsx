@@ -12,7 +12,7 @@ export default function SchedulingPage() {
   const [activeTab, setActiveTab] = useState("schedule");
 
   // Obtener la organización activa del usuario
-  const organizationId = session?.user?.activeOrganizationId;
+  const organizationId = (session as any)?.user?.activeOrganizationId;
 
   if (!organizationId) {
     return (

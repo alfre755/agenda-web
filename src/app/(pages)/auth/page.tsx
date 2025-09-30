@@ -2,10 +2,10 @@
 import { LoginForm } from "@/components/forms/LoginForm";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { toast } from "sonner";
 
-export default function AuthPage() {
+function AuthPageContent() {
   const { signInWithEmail } = useAuth();
   const { sendVerificationEmail, requestPasswordReset } = useAuth();
   const router = useRouter();
@@ -82,5 +82,13 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthPageContent />
+    </Suspense>
   );
 }

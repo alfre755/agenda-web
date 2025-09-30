@@ -1,12 +1,12 @@
 "use client"
 import { useAuth } from "@/hooks/use-auth";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { AppButton } from "@/components/AppButton";
 import { toast } from "sonner";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const { resetPassword } = useAuth();
   const params = useSearchParams();
   const router = useRouter();
@@ -52,5 +52,20 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm space-y-4">
+          <h1 className="text-2xl font-semibold tracking-tight">Restablecer contraseña</h1>
+          <p className="text-sm text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
