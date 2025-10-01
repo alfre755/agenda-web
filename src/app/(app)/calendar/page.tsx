@@ -1,10 +1,11 @@
 "use client";
-import { CalendarIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-
-import { EventModal } from "@/components/calendar/EventModal";
+import { PlusIcon, Calendar as CalendarIcon, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EventModal } from "@/components/calendar/EventModal";
+import Calendar from "@/components/calendar/Calendar";
+import WeeklyCalendar from "@/components/calendar/WeeklyCalendar";
 
 interface EventData {
   title: string;
@@ -14,11 +15,25 @@ interface EventData {
   date: string;
 }
 
-export default function Calendar() {
+export default function CalendarPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [events] = useState([
+    // Ejemplo de eventos para mostrar
+    {
+      id: "1",
+      title: "Reunión de equipo",
+      start: new Date(2024, 11, 15, 10, 0), // 15 de diciembre, 10:00
+    },
+    {
+      id: "2", 
+      title: "Presentación proyecto",
+      start: new Date(2024, 11, 20, 14, 30), // 20 de diciembre, 14:30
+    }
+  ]);
 
-  const handleDateClick = () => {
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date);
     setIsModalOpen(true);
   };
 
@@ -37,39 +52,21 @@ export default function Calendar() {
             Gestiona tus eventos y citas
           </p>
         </div>
-        <Button onClick={handleDateClick} className="flex items-center gap-2">
+        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
           <PlusIcon className="h-4 w-4" />
           Nuevo Evento
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            Vista del Calendario
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-96 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-            <div className="text-center">
-              <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Calendario en desarrollo</h3>
-              <p className="text-muted-foreground mb-4">
-                Estamos creando un nuevo componente de calendario con las funcionalidades que necesitas.
-              </p>
-              <Button onClick={handleDateClick} variant="outline">
-                Crear Primer Evento
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <WeeklyCalendar 
+        onDateClick={handleDateClick}
+        events={events}
+      />
 
       <EventModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        selectedDate={selectedDate}
+        selectedDate={selectedDate.toISOString().split('T')[0]}
         onSave={handleSaveEvent}
       />
     </div>
