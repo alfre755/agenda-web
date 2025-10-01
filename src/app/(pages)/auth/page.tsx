@@ -1,9 +1,10 @@
 "use client"
-import { LoginForm } from "@/components/forms/LoginForm";
-import { useAuth } from "@/hooks/use-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { LoginForm } from "@/components/forms/LoginForm";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function AuthPage() {
   const { signInWithEmail } = useAuth();

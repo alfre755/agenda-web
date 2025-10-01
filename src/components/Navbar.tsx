@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link";
+
 import { AppButton } from "./AppButton";
 
 export default function Navbar() {

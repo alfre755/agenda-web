@@ -1,16 +1,16 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { DataTable, type Column } from "@/components/data-table/DataTable";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+
 import { AppButton } from "@/components/AppButton";
+import { type Column,DataTable } from "@/components/data-table/DataTable";
+import { EntityFormDialog } from "@/components/entity/EntityFormDialog";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
+import { UserForm } from "@/components/forms/UserForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useAdmin } from "@/hooks/use-admin";
 import { useUsers } from "@/hooks/use-users";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UserForm } from "@/components/forms/UserForm";
-import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
-import { EntityFormDialog } from "@/components/entity/EntityFormDialog";
-import { Input } from "@/components/ui/input";
 
 export default function UsersPage() {
   const [rows, setRows] = useState<any[]>([]);

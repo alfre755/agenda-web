@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { asc, desc, sql } from "drizzle-orm";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
+
 import { db } from "@/lib/db";
 import { organization } from "@/lib/db/schema";
-import { asc, desc, sql } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {

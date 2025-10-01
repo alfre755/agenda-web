@@ -1,10 +1,11 @@
 "use client"
-import { useAuth } from "@/hooks/use-auth";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter,useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { AppButton } from "@/components/AppButton";
 import { toast } from "sonner";
+
+import { AppButton } from "@/components/AppButton";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function ResetPasswordPage() {
   const { resetPassword } = useAuth();

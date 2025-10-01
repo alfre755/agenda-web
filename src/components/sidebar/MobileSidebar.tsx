@@ -1,9 +1,11 @@
 "use client"
-import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Sidebar } from "./Sidebar";
-import { AppButton } from "@/components/AppButton";
 import { Menu } from "lucide-react";
+import { useState } from "react";
+
+import { AppButton } from "@/components/AppButton";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+import { Sidebar } from "./Sidebar";
 
 export function MobileSidebar() {
   const [open, setOpen] = useState(false);

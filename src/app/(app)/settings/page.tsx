@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { useUsers } from "@/hooks/use-users";
+import { toast } from "sonner";
+
 import { AppButton } from "@/components/AppButton";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { useUsers } from "@/hooks/use-users";
 
 export default function SettingsPage() {
   const { currentUser, updateUser, changeEmail, changePassword } = useUsers();

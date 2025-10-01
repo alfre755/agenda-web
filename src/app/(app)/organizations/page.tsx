@@ -1,14 +1,15 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { DataTable, type Column } from "@/components/data-table/DataTable";
 import { toast } from "sonner";
+
 import { AppButton } from "@/components/AppButton";
-import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
+import { type Column,DataTable } from "@/components/data-table/DataTable";
 import { EntityFormDialog } from "@/components/entity/EntityFormDialog";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { OrganizationForm } from "@/components/forms/OrganizationForm";
+import { useBackend } from "@/hooks/use-backend";
 import { useOrganizations } from "@/hooks/use-organizations";
 import { useUsers } from "@/hooks/use-users";
-import { useBackend } from "@/hooks/use-backend";
 
 export default function OrganizationsPage() {
   const { createOrganization, updateOrganization, removeOrganization } = useOrganizations();

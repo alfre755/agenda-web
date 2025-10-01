@@ -1,10 +1,12 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db"; // your drizzle instance
 import { organization } from "better-auth/plugins";
 import { admin } from "better-auth/plugins";
-import { ac, roles } from "@/lib/permissions";
+
 import { sendEmail } from "@/lib/mail";
+import { ac, roles } from "@/lib/permissions";
+
+import { db } from "./db"; // your drizzle instance
 
 export const auth = betterAuth({
   emailVerification: {

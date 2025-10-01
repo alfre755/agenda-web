@@ -1,20 +1,21 @@
 "use client";
+import { useState } from "react";
+
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Sidebar } from "@/components/sidebar";
 import { MobileSidebar } from "@/components/sidebar/MobileSidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useUsers } from "@/hooks/use-users";
-import { useAuth } from "@/hooks/use-auth";
-import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useAuth } from "@/hooks/use-auth";
+import { useUsers } from "@/hooks/use-users";
 
 export default function AppPlatformLayout({ children }: { children: React.ReactNode }) {
   const { currentUser } = useUsers();
