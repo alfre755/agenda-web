@@ -7,13 +7,12 @@ import { type Column,DataTable } from "@/components/data-table/DataTable";
 import { EntityFormDialog } from "@/components/entity/EntityFormDialog";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { OrganizationForm } from "@/components/forms/OrganizationForm";
-import { useBackend } from "@/hooks/use-backend";
 import { useOrganizations } from "@/hooks/use-organizations";
 import { useUsers } from "@/hooks/use-users";
 
+
 export default function OrganizationsPage() {
-  const { createOrganization, updateOrganization, removeOrganization } = useOrganizations();
-  const { get } = useBackend();
+  const { createOrganization, updateOrganization, removeOrganization, listOrganizations } = useOrganizations();
   const [rows, setRows] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState<number | undefined>(undefined);
@@ -33,16 +32,21 @@ export default function OrganizationsPage() {
   const fetchOrgs = useCallback(async () => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams({
-        q: search,
-        limit: String(limit),
-        offset: String(offset),
-        sortBy: sortBy || "createdAt",
-        sortDirection,
-      });
-      const d = await get<{ organizations: any[]; total: number; limit: number; offset: number }>(`/api/organizations?${params.toString()}`);
-      setRows(d.organizations ?? []);
-      setTotal(typeof d.total === "number" ? d.total : undefined);
+        const d = await listOrganizations({
+          query: {
+            searchValue: search || undefined,
+            limit,
+            offset,
+            sortBy,
+            sortDirection,
+          },
+        });
+      if (d.error) {
+        throw new Error(d.error.message);
+      }
+      
+      setRows(d.data?.organizations ?? []);
+      setTotal(typeof d.data?.total === "number" ? d.data.total : undefined);
     } catch (err: any) {
       toast.error(err?.message ?? "Error al cargar organizaciones");
     } finally {
