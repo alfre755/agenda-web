@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { useUsers } from "@/hooks/use-users";
+import BackendProvider from "@/hooks/use-backend-context";
+import { ToastProvider } from "@/hooks/use-toast";
 
 export default function AppPlatformLayout({ children }: { children: React.ReactNode }) {
   const { currentUser } = useUsers();
@@ -23,7 +25,9 @@ export default function AppPlatformLayout({ children }: { children: React.ReactN
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   return (
-    <div className="min-h-[calc(100vh-56px)] grid grid-cols-1 sm:grid-cols-[auto_1fr]">
+    <ToastProvider>
+      <BackendProvider>
+        <div className="min-h-[calc(100vh-56px)] grid grid-cols-1 sm:grid-cols-[auto_1fr]">
       <div className="border-b sm:hidden px-4 py-2 flex items-center gap-2">
         <MobileSidebar />
         <span className="font-semibold text-sm">Agenda Centralizada</span>
@@ -90,6 +94,8 @@ export default function AppPlatformLayout({ children }: { children: React.ReactN
           }
         }}
       />
-    </div>
+        </div>
+      </BackendProvider>
+    </ToastProvider>
   );
 }

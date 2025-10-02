@@ -1,4 +1,9 @@
-import { boolean, integer, json,pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -30,7 +35,7 @@ export const session = pgTable("session", {
   userAgent: text("user_agent"),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, {  }),
   activeOrganizationId: text("active_organization_id"),
   impersonatedBy: text("impersonated_by"),
 });
@@ -41,7 +46,7 @@ export const account = pgTable("account", {
   providerId: text("provider_id").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, {  }),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
@@ -59,10 +64,10 @@ export const verification = pgTable("verification", {
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
+    () => /* @__PURE__ */ new Date()
   ),
   updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
+    () => /* @__PURE__ */ new Date()
   ),
 });
 
@@ -79,10 +84,10 @@ export const member = pgTable("member", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
+    .references(() => organization.id, {  }),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, {  }),
   role: text("role").default("member").notNull(),
   createdAt: timestamp("created_at").notNull(),
 });
@@ -91,14 +96,14 @@ export const invitation = pgTable("invitation", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
+    .references(() => organization.id, {  }),
   email: text("email").notNull(),
   role: text("role"),
   status: text("status").default("pending").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   inviterId: text("inviter_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, {  }),
 });
 
 export const calendar = pgTable("calendar", {
@@ -108,7 +113,7 @@ export const calendar = pgTable("calendar", {
   color: text("color").default("#3b82f6"), // Color por defecto azul
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
+    .references(() => organization.id, {  }),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -117,58 +122,11 @@ export const calendar = pgTable("calendar", {
     .notNull(),
 });
 
-export const event = pgTable("event", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  start: timestamp("start").notNull(),
-  end: timestamp("end").notNull(),
-  allDay: boolean("all_day").default(false).notNull(),
-  location: text("location"),
-  calendarId: text("calendar_id")
-    .notNull()
-    .references(() => calendar.id, { onDelete: "cascade" }),
-  createdById: text("created_by_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => new Date())
-    .notNull(),
-});
-
-// Configuración de horarios de la organización
-export const organizationSchedule = pgTable("organization_schedule", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  dayOfWeek: integer("day_of_week").notNull(), // 0 = Domingo, 1 = Lunes, etc.
-  startTime: text("start_time").notNull(), // "08:00"
-  endTime: text("end_time").notNull(), // "18:00"
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => new Date())
-    .notNull(),
-});
-
-// Servicios que ofrece la organización
-export const service = pgTable("service", {
+export const client = pgTable("client", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description"),
-  duration: integer("duration").notNull(), // Duración en minutos
-  price: integer("price"), // Precio en centavos
-  color: text("color").default("#3b82f6"),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  isActive: boolean("is_active").default(true).notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -180,21 +138,17 @@ export const service = pgTable("service", {
 // Citas/Reservas
 export const appointment = pgTable("appointment", {
   id: text("id").primaryKey(),
-  serviceId: text("service_id")
+  clientId: text("client_id")
     .notNull()
-    .references(() => service.id, { onDelete: "cascade" }),
-  clientName: text("client_name").notNull(),
-  clientEmail: text("client_email").notNull(),
-  clientPhone: text("client_phone"),
-  start: timestamp("start").notNull(),
-  end: timestamp("end").notNull(),
-  status: text("status").default("confirmed").notNull(), // confirmed, cancelled, completed
-  notes: text("notes"),
+    .references(() => client.id),
+  startHour: timestamp("start_hour").notNull(),
+  endHour: timestamp("end_hour").notNull(),
+  status: text("status").default("in-progress").notNull(), // in-progress, completed, cancelled
+  observation: text("observation"),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  createdById: text("created_by_id")
-    .references(() => user.id, { onDelete: "set null" }),
+    .references(() => organization.id),
+  createdById: text("created_by_id").references(() => user.id),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -203,22 +157,3 @@ export const appointment = pgTable("appointment", {
     .notNull(),
 });
 
-// Configuración de disponibilidad (horarios especiales, días libres, etc.)
-export const availability = pgTable("availability", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // "blocked", "special_hours", "break"
-  title: text("title").notNull(),
-  start: timestamp("start").notNull(),
-  end: timestamp("end").notNull(),
-  isRecurring: boolean("is_recurring").default(false).notNull(),
-  recurringPattern: json("recurring_pattern"), // Para horarios recurrentes
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => new Date())
-    .notNull(),
-});

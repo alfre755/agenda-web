@@ -1,74 +1,46 @@
 "use client";
-import { useState } from "react";
-import { PlusIcon, Calendar as CalendarIcon, CalendarDays } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EventModal } from "@/components/calendar/EventModal";
-import Calendar from "@/components/calendar/Calendar";
-import WeeklyCalendar from "@/components/calendar/WeeklyCalendar";
+import { useCallback, useEffect, useState } from "react";
 
-interface EventData {
-  title: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  date: string;
-}
+import CalendarView from "@/components/calendar/CalendarView";
+import { useBackend } from "@/hooks/use-backend-context";
+import type { AppointmentWithRelations } from "@/types/appointments";
 
 export default function CalendarPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [events] = useState([
-    // Ejemplo de eventos para mostrar
-    {
-      id: "1",
-      title: "Reunión de equipo",
-      start: new Date(2024, 11, 15, 10, 0), // 15 de diciembre, 10:00
-    },
-    {
-      id: "2", 
-      title: "Presentación proyecto",
-      start: new Date(2024, 11, 20, 14, 30), // 20 de diciembre, 14:30
+  const backendHandler = useBackend();
+  const [appointments, setAppointments] = useState<AppointmentWithRelations[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+
+  const fetchAppointments = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await backendHandler.appointments.listar();
+      if (response.success && response.data) {
+        setAppointments(response.data as AppointmentWithRelations[]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching appointments:", error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  }, [backendHandler]);
 
-  const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-    setIsModalOpen(true);
-  };
-
-  const handleSaveEvent = (_eventData: EventData) => {
-    // TODO: Implementar guardado en base de datos
-    // console.warn("Evento creado:", _eventData);
-    // Aquí puedes agregar la lógica para guardar el evento
-  };
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Calendario</h1>
-          <p className="text-muted-foreground">
-            Gestiona tus eventos y citas
-          </p>
+    <div>
+      {loading ? (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-muted-foreground">Cargando eventos...</div>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
-          <PlusIcon className="h-4 w-4" />
-          Nuevo Evento
-        </Button>
-      </div>
-
-      <WeeklyCalendar 
-        onDateClick={handleDateClick}
-        events={events}
-      />
-
-      <EventModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        selectedDate={selectedDate.toISOString().split('T')[0]}
-        onSave={handleSaveEvent}
-      />
+      ) : (
+        <div>
+          <CalendarView appointments={appointments} calendarConfig={[]} />
+        </div>
+      )}
     </div>
   );
 }
