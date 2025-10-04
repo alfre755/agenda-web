@@ -1,11 +1,296 @@
 "use client";
 import React from "react";
-import PropTypes from "prop-types";
+import TimeSlot from "./TimeSlot";
 
-function WeeklyView(props) {
-  return <div>WeeklyView</div>;
+interface WeeklyViewProps {
+  appointments: any[];
+  calendarConfig: {
+    startDay: string;
+    endDay: string;
+    startHourCalendar: string;
+    endHourCalendar: string;
+    slotDurationCalendar: string;
+  } | null;
 }
 
-WeeklyView.propTypes = {};
+function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
+  if (!calendarConfig) {
+    return (
+      <div className="p-6">
+        <p className="text-muted-foreground">
+          No hay configuración de calendario disponible
+        </p>
+      </div>
+    );
+  }
+
+  // Obtener la semana actual
+  const getCurrentWeek = () => {
+    const today = new Date();
+    const startDay = parseInt(calendarConfig.startDay);
+
+    // Obtener el lunes de la semana actual
+    const monday = new Date(today);
+    const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); // Convertir domingo de 0 a 7
+    const daysToMonday = dayOfWeek - 1;
+    monday.setDate(today.getDate() - daysToMonday);
+
+    // Ajustar al día de inicio configurado
+    const daysToStart = startDay - 1;
+    const weekStart = new Date(monday);
+    weekStart.setDate(monday.getDate() + daysToStart);
+
+    return weekStart;
+  };
+
+  const currentWeekStart = getCurrentWeek();
+  console.log("Semana actual:", currentWeekStart);
+  console.log(appointments, "appointments");
+  // Mapeo de días de la semana
+  const dayNames = {
+    "1": "Lunes",
+    "2": "Martes",
+    "3": "Miércoles",
+    "4": "Jueves",
+    "5": "Viernes",
+    "6": "Sábado",
+    "7": "Domingo",
+  };
+
+  // Generar días de la semana basados en la configuración
+  const generateDays = () => {
+    const startDay = parseInt(calendarConfig.startDay);
+    const endDay = parseInt(calendarConfig.endDay);
+    const days = [];
+
+    for (let day = startDay; day <= endDay; day++) {
+      days.push({
+        number: day,
+        name: dayNames[day as keyof typeof dayNames],
+      });
+    }
+
+    return days;
+  };
+
+  // Helpers
+  const parseSlotDuration = (val: string | number) => {
+    if (typeof val === "number") return val;
+    if (!val || typeof val !== "string") return NaN;
+
+    // Si viene como "HH:MM"
+    if (val.includes(":")) {
+      const [h, m] = val.split(":").map((s) => parseInt(s, 10) || 0);
+      return h * 60 + m;
+    }
+
+    // Si viene como "30", "30m", "30 min", etc.
+    const m = val.match(/(\d+(\.\d+)?)/);
+    return m ? Number(m[0]) : NaN;
+  };
+
+  const generateTimeSlots = () => {
+    const { startHourCalendar, endHourCalendar, slotDurationCalendar } =
+      calendarConfig;
+
+    // logs iniciales — muy importante para debug
+    console.log("📋 calendarConfig:", calendarConfig);
+
+    const slotDuration = parseSlotDuration(slotDurationCalendar);
+    const [startH, startM] = (startHourCalendar || "00:00")
+      .split(":")
+      .map((s) => parseInt(s, 10) || 0);
+    const [endH, endM] = (endHourCalendar || "00:00")
+      .split(":")
+      .map((s) => parseInt(s, 10) || 0);
+
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+
+    console.log(
+      "🔢 startMinutes, endMinutes, slotDuration:",
+      startMinutes,
+      endMinutes,
+      slotDuration
+    );
+
+    // Validaciones rápidas
+    if (!Number.isFinite(slotDuration) || slotDuration <= 0) {
+      console.error(
+        "❌ slotDuration inválido:",
+        slotDurationCalendar,
+        "->",
+        slotDuration
+      );
+      return [];
+    }
+    if (endMinutes <= startMinutes) {
+      console.error(
+        "❌ rango horario inválido: end <= start",
+        startHourCalendar,
+        endHourCalendar
+      );
+      return [];
+    }
+
+    const expectedApprox = Math.ceil(
+      (endMinutes - startMinutes) / slotDuration
+    );
+    console.log("📐 expectedApprox slots:", expectedApprox);
+
+    // Generar slots con tope de seguridad para evitar bucles infinitos
+    const slots: string[] = [];
+    let current = startMinutes;
+    let iterations = 0;
+    const maxIterations = expectedApprox + 1000; // margen amplio por seguridad
+
+    while (current < endMinutes && iterations++ < maxIterations) {
+      const hh = Math.floor(current / 60);
+      const mm = current % 60;
+      const timeString = `${hh.toString().padStart(2, "0")}:${mm
+        .toString()
+        .padStart(2, "0")}`;
+      slots.push(timeString);
+
+      current += slotDuration;
+
+      // Evitar errores por decimales: redondear a entero de minutos
+      current = Math.round(current);
+    }
+
+    if (iterations >= maxIterations) {
+      console.error(
+        "⚠️ alcanzado maxIterations:",
+        iterations,
+        "— posible bucle infinito o slotDuration demasiado pequeño"
+      );
+    }
+
+    // Detectar duplicados (si los hay)
+    const unique = [...new Set(slots)];
+    if (unique.length !== slots.length) {
+      const duplicates = slots.filter((s, i) => slots.indexOf(s) !== i);
+      console.warn("⚠️ Se detectaron slots duplicados:", duplicates);
+    }
+
+    console.log(
+      "✅ slots generados:",
+      slots.length,
+      "unique:",
+      unique.length,
+      "primer/ultimo:",
+      slots[0],
+      slots[slots.length - 1]
+    );
+    console.log("🕓 Tiempo total (minutos):", endMinutes - startMinutes);
+    console.log("⏱️ Duración de cada slot:", slotDuration);
+    console.log(
+      "🧮 Cantidad esperada exacta:",
+      (endMinutes - startMinutes) / slotDuration
+    );
+
+    return unique;
+  };
+
+  const days = React.useMemo(() => generateDays(), [calendarConfig]);
+  const timeSlots = React.useMemo(() => generateTimeSlots(), [calendarConfig]);
+
+  // Debug: verificar slots generados
+  console.log("Total de slots:", timeSlots.length);
+  console.log("Último slot:", timeSlots[timeSlots.length - 1]);
+
+  // Función para filtrar citas por día y hora específica
+  const getAppointmentsForSlot = (dayNumber: number, time: string) => {
+    return appointments.filter((apt) => {
+      const aptDate = new Date(apt.startHour);
+      const aptDay = aptDate.getDay() === 0 ? 7 : aptDate.getDay(); // Convertir domingo de 0 a 7
+      const aptTime = aptDate.toTimeString().slice(0, 5);
+
+      // Verificar que la cita esté en la semana actual
+      const weekStart = new Date(currentWeekStart);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(
+        weekStart.getDate() +
+          (parseInt(calendarConfig.endDay) - parseInt(calendarConfig.startDay))
+      );
+
+      const isInCurrentWeek = aptDate >= weekStart && aptDate <= weekEnd;
+
+      return isInCurrentWeek && aptDay === dayNumber && aptTime === time;
+    });
+  };
+
+  // Función para formatear la fecha
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  // Calcular el final de la semana
+  const weekEnd = new Date(currentWeekStart);
+  weekEnd.setDate(
+    currentWeekStart.getDate() +
+      (parseInt(calendarConfig.endDay) - parseInt(calendarConfig.startDay))
+  );
+
+  return (
+    <div className="p-6">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold">Vista Semanal</h2>
+        <p className="text-sm text-muted-foreground">
+          {formatDate(currentWeekStart)} - {formatDate(weekEnd)}
+        </p>
+      </div>
+
+      <div className="flex">
+        {/* Columna de horas a la izquierda */}
+        <div className="w-16 flex-shrink-0">
+          <div className="text-sm font-medium text-muted-foreground p-2 h-12 border-b">
+            Hora
+          </div>
+          {timeSlots.map((time) => (
+            <div
+              key={time}
+              className="text-xs text-muted-foreground p-1 h-10 border-b flex items-center"
+            >
+              {time}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex-1">
+          {/* Headers de días */}
+          <div className="flex">
+            {days.map((day) => (
+              <div
+                key={day.number}
+                className="flex-1 text-sm font-medium text-center p-2 border-b border-l"
+              >
+                {day.name}
+              </div>
+            ))}
+          </div>
+
+          {/* Slots de tiempo para cada día */}
+          <div className="space-y-0">
+            {timeSlots.map((time) => (
+              <div key={time} className="flex">
+                {days.map((day) => (
+                  <TimeSlot
+                    key={`${day.number}-${time}`}
+                    appointments={getAppointmentsForSlot(day.number, time)}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default WeeklyView;

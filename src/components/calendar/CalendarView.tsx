@@ -1,22 +1,31 @@
 "use client";
 import React from "react";
+import WeeklyView from "./WeeklyView";
 
 interface CalendarViewProps {
   appointments: unknown[];
-  calendarConfig: unknown[];
+  calendarConfig: {
+    startDay: string;
+    endDay: string;
+    startHourCalendar: string;
+    endHourCalendar: string;
+    slotDurationCalendar: string;
+  } | null;
 }
 
-export default function CalendarView({ appointments }: CalendarViewProps) {
+export default function CalendarView({
+  appointments,
+  calendarConfig,
+}: CalendarViewProps) {
+ 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Calendario</h1>
-      <div className="bg-muted/50 p-4 rounded-lg">
-        <p className="text-muted-foreground">
-          CalendarView component - {appointments.length} appointments loaded
-        </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Este componente se conectará con la API de appointments
-        </p>
+      <div className="calendar">
+        <WeeklyView
+          appointments={appointments}
+          calendarConfig={calendarConfig}
+        />
       </div>
     </div>
   );

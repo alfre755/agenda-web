@@ -74,6 +74,15 @@ export interface BackendRequestsLibrary {
     obtener: BackendRequest;
     eliminar: BackendRequest;
   };
+  
+  // Calendar Config
+  calendarConfig: {
+    listar: BackendRequest;
+    crear: BackendRequest;
+    modificar: BackendRequest;
+    obtener: BackendRequest;
+    eliminar: BackendRequest;
+  };
 }
 
 export type BackendContextObject = BackendRequestsLibrary;

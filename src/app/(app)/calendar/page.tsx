@@ -10,6 +10,9 @@ export default function CalendarPage() {
   const [appointments, setAppointments] = useState<AppointmentWithRelations[]>(
     []
   );
+  const [calendarConfig, setCalendarConfig] = useState<any | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   const fetchAppointments = useCallback(async () => {
@@ -24,11 +27,30 @@ export default function CalendarPage() {
     } finally {
       setLoading(false);
     }
-  }, [backendHandler]);
+  }, [backendHandler.appointments.listar]);
+
+  
+  const fetchCalendarConfig = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await backendHandler.calendarConfig.listar();
+      if (response.success && response.data) {
+        setCalendarConfig(response.data as any);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching calendarConfig:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [backendHandler.calendarConfig.listar]);
 
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  useEffect(() => {
+    fetchCalendarConfig();
+  }, [fetchCalendarConfig]);
 
   return (
     <div>
@@ -38,7 +60,7 @@ export default function CalendarPage() {
         </div>
       ) : (
         <div>
-          <CalendarView appointments={appointments} calendarConfig={[]} />
+          <CalendarView appointments={appointments} calendarConfig={calendarConfig} />
         </div>
       )}
     </div>

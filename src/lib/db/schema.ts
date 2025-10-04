@@ -3,6 +3,7 @@ import {
   pgTable,
   text,
   timestamp,
+  bigint,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -107,7 +108,7 @@ export const invitation = pgTable("invitation", {
 });
 
 export const calendar = pgTable("calendar", {
-  id: text("id").primaryKey(),
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
   description: text("description"),
   color: text("color").default("#3b82f6"), // Color por defecto azul
@@ -123,7 +124,7 @@ export const calendar = pgTable("calendar", {
 });
 
 export const client = pgTable("client", {
-  id: text("id").primaryKey(),
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -137,8 +138,8 @@ export const client = pgTable("client", {
 
 // Citas/Reservas
 export const appointment = pgTable("appointment", {
-  id: text("id").primaryKey(),
-  clientId: text("client_id")
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  clientId: bigint("client_id", { mode: "number" })
     .notNull()
     .references(() => client.id),
   startHour: timestamp("start_hour").notNull(),
@@ -149,6 +150,28 @@ export const appointment = pgTable("appointment", {
     .notNull()
     .references(() => organization.id),
   createdById: text("created_by_id").references(() => user.id),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+// Configuración de calendario
+export const calendar_config = pgTable("calendar_config", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  calendarId: bigint("calendar_id", { mode: "number" })
+    .notNull()
+    .references(() => calendar.id),
+  startDay: text("start_day").default("1").notNull(), // Día de inicio (1=lunes, 7=domingo)
+  endDay: text("end_day").default("6").notNull(), // Día de fin (1=lunes, 7=domingo)
+  startHourCalendar: text("start_hour_calendar").default("08:00").notNull(), // Hora de inicio (8am)
+  endHourCalendar: text("end_hour_calendar").default("18:00").notNull(), // Hora de fin (6pm)
+  slotDurationCalendar: text("slot_duration_calendar").default("5").notNull(), // Duración de cada slot en minutos
+  createdById: text("created_by_id")
+    .notNull()
+    .references(() => user.id),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

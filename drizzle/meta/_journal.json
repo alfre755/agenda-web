@@ -29,6 +29,27 @@
       "when": 1759372744508,
       "tag": "0003_steady_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1759545568562,
+      "tag": "0005_lean_lake",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1759546500000,
+      "tag": "0005_create_calendar_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1759547601249,
+      "tag": "0006_silky_bloodstrike",
+      "breakpoints": true
     }
   ]
 }

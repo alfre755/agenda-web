@@ -38,6 +38,7 @@ const APPOINTMENTS_ENDPOINT = "/api/appointments";
 const CLIENTS_ENDPOINT = "/api/clients";
 const CALENDARS_ENDPOINT = "/api/calendars";
 const ORGANIZATIONS_ENDPOINT = "/api/organizations";
+const CALENDAR_CONFIG_ENDPOINT = "/api/calendar-config";
 
 interface BackendProviderProps {
   children: React.ReactNode;
@@ -169,6 +170,13 @@ export default function BackendProvider({ children }: BackendProviderProps) {
         modificar: _createEventRequest(ORGANIZATIONS_ENDPOINT, "PUT"),
         obtener: _createEventRequest(ORGANIZATIONS_ENDPOINT, "GET"),
         eliminar: _createEventRequest(ORGANIZATIONS_ENDPOINT, "DELETE"),
+      },
+      calendarConfig: {
+        listar: _createEventRequest(CALENDAR_CONFIG_ENDPOINT, "GET"),
+        crear: _createEventRequest(CALENDAR_CONFIG_ENDPOINT, "POST"),
+        modificar: _createEventRequest(CALENDAR_CONFIG_ENDPOINT, "PUT"),
+        obtener: _createEventRequest(CALENDAR_CONFIG_ENDPOINT, "GET"),
+        eliminar: _createEventRequest(CALENDAR_CONFIG_ENDPOINT, "DELETE"),
       },
     }),
     [_createEventRequest]
