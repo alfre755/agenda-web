@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 // GET /api/appointments/[id] - Obtener appointment específico
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -22,7 +22,7 @@ export async function GET(
       );
     }
 
-    const appointmentId = params.id;
+    const { id: appointmentId } = await params;
 
     // Obtener appointment con datos relacionados
     const [appointmentData] = await db
@@ -75,7 +75,7 @@ export async function GET(
 // PUT /api/appointments/[id] - Actualizar appointment
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -89,7 +89,7 @@ export async function PUT(
       );
     }
 
-    const appointmentId = params.id;
+    const { id: appointmentId } = await params;
     const body = await request.json();
     
     // Validar datos (incluyendo el ID)
@@ -198,7 +198,7 @@ export async function PUT(
 // DELETE /api/appointments/[id] - Eliminar appointment
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -212,7 +212,7 @@ export async function DELETE(
       );
     }
 
-    const appointmentId = params.id;
+    const { id: appointmentId } = await params;
 
     // Verificar que el appointment existe
     const [existingAppointment] = await db

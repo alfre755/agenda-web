@@ -45,8 +45,9 @@ export default function OrganizationsPage() {
         throw new Error(d.error.message);
       }
       
-      setRows(d.data?.organizations ?? []);
-      setTotal(typeof d.data?.total === "number" ? d.data.total : undefined);
+      const responseData = d.data as any;
+      setRows(Array.isArray(responseData) ? responseData : responseData?.organizations ?? []);
+      setTotal(typeof responseData?.total === "number" ? responseData.total : undefined);
     } catch (err: any) {
       toast.error(err?.message ?? "Error al cargar organizaciones");
     } finally {
