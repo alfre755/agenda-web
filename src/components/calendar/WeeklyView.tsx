@@ -44,8 +44,7 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
   };
 
   const currentWeekStart = getCurrentWeek();
-  console.log("Semana actual:", currentWeekStart);
-  console.log(appointments, "appointments");
+
   // Mapeo de días de la semana
   const dayNames = {
     "1": "Lunes",
@@ -93,8 +92,6 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
     const { startHourCalendar, endHourCalendar, slotDurationCalendar } =
       calendarConfig;
 
-    // logs iniciales — muy importante para debug
-    console.log("📋 calendarConfig:", calendarConfig);
 
     const slotDuration = parseSlotDuration(slotDurationCalendar);
     const [startH, startM] = (startHourCalendar || "00:00")
@@ -107,12 +104,6 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
     const startMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
 
-    console.log(
-      "🔢 startMinutes, endMinutes, slotDuration:",
-      startMinutes,
-      endMinutes,
-      slotDuration
-    );
 
     // Validaciones rápidas
     if (!Number.isFinite(slotDuration) || slotDuration <= 0) {
@@ -136,7 +127,7 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
     const expectedApprox = Math.ceil(
       (endMinutes - startMinutes) / slotDuration
     );
-    console.log("📐 expectedApprox slots:", expectedApprox);
+ 
 
     // Generar slots con tope de seguridad para evitar bucles infinitos
     const slots: string[] = [];
@@ -173,31 +164,11 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
       console.warn("⚠️ Se detectaron slots duplicados:", duplicates);
     }
 
-    console.log(
-      "✅ slots generados:",
-      slots.length,
-      "unique:",
-      unique.length,
-      "primer/ultimo:",
-      slots[0],
-      slots[slots.length - 1]
-    );
-    console.log("🕓 Tiempo total (minutos):", endMinutes - startMinutes);
-    console.log("⏱️ Duración de cada slot:", slotDuration);
-    console.log(
-      "🧮 Cantidad esperada exacta:",
-      (endMinutes - startMinutes) / slotDuration
-    );
-
     return unique;
   };
 
   const days = React.useMemo(() => generateDays(), [calendarConfig]);
   const timeSlots = React.useMemo(() => generateTimeSlots(), [calendarConfig]);
-
-  // Debug: verificar slots generados
-  console.log("Total de slots:", timeSlots.length);
-  console.log("Último slot:", timeSlots[timeSlots.length - 1]);
 
   // Función para filtrar citas por día y hora específica
   const getAppointmentsForSlot = (dayNumber: number, time: string) => {
