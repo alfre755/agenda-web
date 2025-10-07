@@ -12,7 +12,7 @@ export function useAppointments() {
     try {
       setLoading(true);
       setError(null);
-      const result = await backend.listAppointments(filters);
+      const result = await backend.appointments.listar(filters);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error desconocido";
@@ -27,7 +27,7 @@ export function useAppointments() {
     try {
       setLoading(true);
       setError(null);
-      const result = await backend.getAppointment(appointmentId);
+      const result = await backend.appointments.obtener(appointmentId);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error desconocido";
@@ -42,7 +42,7 @@ export function useAppointments() {
     try {
       setLoading(true);
       setError(null);
-      const result = await backend.createAppointment(appointmentData);
+      const result = await backend.appointments.crear(appointmentData);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error desconocido";
@@ -57,7 +57,7 @@ export function useAppointments() {
     try {
       setLoading(true);
       setError(null);
-      const result = await backend.updateAppointment(appointmentData);
+      const result = await backend.appointments.modificar(appointmentData);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error desconocido";
@@ -72,7 +72,7 @@ export function useAppointments() {
     try {
       setLoading(true);
       setError(null);
-      const result = await backend.deleteAppointment(appointmentId);
+      const result = await backend.appointments.eliminar(appointmentId);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error desconocido";

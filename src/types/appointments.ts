@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Schema de validación para crear/actualizar appointments
 export const CreateAppointmentSchema = z.object({
-  clientId: z.string().min(1, "Client ID es requerido"),
+  clientRut: z.string().min(1, "RUT del cliente es requerido"),
   startHour: z.string().datetime("Fecha de inicio inválida"),
   endHour: z.string().datetime("Fecha de fin inválida"),
   status: z.enum(["in-progress", "completed", "cancelled"]).default("in-progress"),
@@ -35,6 +35,7 @@ export interface AppointmentWithRelations {
   // Datos relacionados (opcionales)
   client?: {
     id: string;
+    rut: string;
     name: string;
     email: string;
     phone?: string;

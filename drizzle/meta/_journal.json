@@ -50,6 +50,13 @@
       "when": 1759547601249,
       "tag": "0006_silky_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1759801805275,
+      "tag": "0007_lyrical_iron_patriot",
+      "breakpoints": true
     }
   ]
 }

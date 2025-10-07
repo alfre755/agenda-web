@@ -11,11 +11,15 @@ interface CalendarViewProps {
     endHourCalendar: string;
     slotDurationCalendar: string;
   } | null;
+  organizationId?: string;
+  onAppointmentCreated?: () => void;
 }
 
 export default function CalendarView({
   appointments,
   calendarConfig,
+  organizationId,
+  onAppointmentCreated,
 }: CalendarViewProps) {
  
   return (
@@ -25,6 +29,8 @@ export default function CalendarView({
         <WeeklyView
           appointments={appointments}
           calendarConfig={calendarConfig}
+          organizationId={organizationId}
+          onAppointmentCreated={onAppointmentCreated}
         />
       </div>
     </div>

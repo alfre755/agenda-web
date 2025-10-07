@@ -11,9 +11,152 @@ interface WeeklyViewProps {
     endHourCalendar: string;
     slotDurationCalendar: string;
   } | null;
+  organizationId?: string;
+  onAppointmentCreated?: () => void;
 }
 
-function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
+function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmentCreated }: WeeklyViewProps) {
+  // Mapeo de días de la semana
+  const dayNames = {
+    "1": "Lunes",
+    "2": "Martes",
+    "3": "Miércoles",
+    "4": "Jueves",
+    "5": "Viernes",
+    "6": "Sábado",
+    "7": "Domingo",
+  };
+
+  // Generar días de la semana basados en la configuración
+  const generateDays = () => {
+    if (!calendarConfig) return [];
+    const startDay = parseInt(calendarConfig.startDay);
+    const endDay = parseInt(calendarConfig.endDay);
+    const days = [];
+
+    for (let day = startDay; day <= endDay; day++) {
+      days.push({
+        number: day,
+        name: dayNames[day.toString() as keyof typeof dayNames],
+      });
+    }
+
+    return days;
+  };
+
+  // Helpers
+  const parseSlotDuration = (val: string | number) => {
+    if (typeof val === "number") return val;
+    if (!val || typeof val !== "string") return NaN;
+
+    // Si viene como "HH:MM"
+    if (val.includes(":")) {
+      const [h, m] = val.split(":").map((s) => parseInt(s, 10) || 0);
+      return h * 60 + m;
+    }
+
+    // Si viene como "30", "30m", "30 min", etc.
+    const m = val.match(/(\d+(\.\d+)?)/);
+    return m ? Number(m[0]) : NaN;
+  };
+
+  const generateTimeSlots = () => {
+    if (!calendarConfig) return [];
+    const { startHourCalendar, endHourCalendar, slotDurationCalendar } =
+      calendarConfig;
+
+    const slotDuration = parseSlotDuration(slotDurationCalendar);
+    const [startH, startM] = (startHourCalendar || "00:00")
+      .split(":")
+      .map((s) => parseInt(s, 10) || 0);
+    const [endH, endM] = (endHourCalendar || "00:00")
+      .split(":")
+      .map((s) => parseInt(s, 10) || 0);
+
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+
+    // Validaciones rápidas
+    if (!Number.isFinite(slotDuration) || slotDuration <= 0) {
+      console.error(
+        "❌ slotDuration inválido:",
+        slotDurationCalendar,
+        "->",
+        slotDuration
+      );
+      return [];
+    }
+    if (endMinutes <= startMinutes) {
+      console.error(
+        "❌ rango horario inválido: end <= start",
+        startHourCalendar,
+        endHourCalendar
+      );
+      return [];
+    }
+
+    const expectedApprox = Math.ceil(
+      (endMinutes - startMinutes) / slotDuration
+    );
+
+    // Generar slots con tope de seguridad para evitar bucles infinitos
+    const slots: { startHour: string; endHour: string }[] = [];
+    let current = startMinutes;
+    let iterations = 0;
+    const maxIterations = expectedApprox + 1000; // margen amplio por seguridad
+
+    while (current < endMinutes && iterations++ < maxIterations) {
+      const hh = Math.floor(current / 60);
+      const mm = current % 60;
+      const startTimeString = `${hh.toString().padStart(2, "0")}:${mm
+        .toString()
+        .padStart(2, "0")}`;
+      
+      // Calcular el endHour
+      const endMinutesForSlot = current + slotDuration;
+      const endHh = Math.floor(endMinutesForSlot / 60);
+      const endMm = endMinutesForSlot % 60;
+      const endTimeString = `${endHh.toString().padStart(2, "0")}:${endMm
+        .toString()
+        .padStart(2, "0")}`;
+
+      slots.push({
+        startHour: startTimeString,
+        endHour: endTimeString
+      });
+
+      current += slotDuration;
+
+      // Evitar errores por decimales: redondear a entero de minutos
+      current = Math.round(current);
+    }
+
+    if (iterations >= maxIterations) {
+      console.error(
+        "⚠️ alcanzado maxIterations:",
+        iterations,
+        "— posible bucle infinito o slotDuration demasiado pequeño"
+      );
+    }
+
+    // Detectar duplicados (si los hay)
+    const unique = slots.filter((slot, index, arr) => 
+      arr.findIndex(s => s.startHour === slot.startHour) === index
+    );
+    if (unique.length !== slots.length) {
+      const duplicates = slots.filter((slot, i) => 
+        slots.findIndex(s => s.startHour === slot.startHour) !== i
+      );
+      console.warn("⚠️ Se detectaron slots duplicados:", duplicates);
+    }
+
+    return unique;
+  };
+
+  // Hooks
+  const days = React.useMemo(() => generateDays(), [calendarConfig]);
+  const timeSlots = React.useMemo(() => generateTimeSlots(), [calendarConfig]);
+
   if (!calendarConfig) {
     return (
       <div className="p-6">
@@ -44,152 +187,6 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
   };
 
   const currentWeekStart = getCurrentWeek();
-
-  // Mapeo de días de la semana
-  const dayNames = {
-    "1": "Lunes",
-    "2": "Martes",
-    "3": "Miércoles",
-    "4": "Jueves",
-    "5": "Viernes",
-    "6": "Sábado",
-    "7": "Domingo",
-  };
-
-  // Generar días de la semana basados en la configuración
-  const generateDays = () => {
-    const startDay = parseInt(calendarConfig.startDay);
-    const endDay = parseInt(calendarConfig.endDay);
-    const days = [];
-
-    for (let day = startDay; day <= endDay; day++) {
-      days.push({
-        number: day,
-        name: dayNames[day as keyof typeof dayNames],
-      });
-    }
-
-    return days;
-  };
-
-  // Helpers
-  const parseSlotDuration = (val: string | number) => {
-    if (typeof val === "number") return val;
-    if (!val || typeof val !== "string") return NaN;
-
-    // Si viene como "HH:MM"
-    if (val.includes(":")) {
-      const [h, m] = val.split(":").map((s) => parseInt(s, 10) || 0);
-      return h * 60 + m;
-    }
-
-    // Si viene como "30", "30m", "30 min", etc.
-    const m = val.match(/(\d+(\.\d+)?)/);
-    return m ? Number(m[0]) : NaN;
-  };
-
-  const generateTimeSlots = () => {
-    const { startHourCalendar, endHourCalendar, slotDurationCalendar } =
-      calendarConfig;
-
-
-    const slotDuration = parseSlotDuration(slotDurationCalendar);
-    const [startH, startM] = (startHourCalendar || "00:00")
-      .split(":")
-      .map((s) => parseInt(s, 10) || 0);
-    const [endH, endM] = (endHourCalendar || "00:00")
-      .split(":")
-      .map((s) => parseInt(s, 10) || 0);
-
-    const startMinutes = startH * 60 + startM;
-    const endMinutes = endH * 60 + endM;
-
-
-    // Validaciones rápidas
-    if (!Number.isFinite(slotDuration) || slotDuration <= 0) {
-      console.error(
-        "❌ slotDuration inválido:",
-        slotDurationCalendar,
-        "->",
-        slotDuration
-      );
-      return [];
-    }
-    if (endMinutes <= startMinutes) {
-      console.error(
-        "❌ rango horario inválido: end <= start",
-        startHourCalendar,
-        endHourCalendar
-      );
-      return [];
-    }
-
-    const expectedApprox = Math.ceil(
-      (endMinutes - startMinutes) / slotDuration
-    );
- 
-
-    // Generar slots con tope de seguridad para evitar bucles infinitos
-    const slots: string[] = [];
-    let current = startMinutes;
-    let iterations = 0;
-    const maxIterations = expectedApprox + 1000; // margen amplio por seguridad
-
-    while (current < endMinutes && iterations++ < maxIterations) {
-      const hh = Math.floor(current / 60);
-      const mm = current % 60;
-      const timeString = `${hh.toString().padStart(2, "0")}:${mm
-        .toString()
-        .padStart(2, "0")}`;
-      slots.push(timeString);
-
-      current += slotDuration;
-
-      // Evitar errores por decimales: redondear a entero de minutos
-      current = Math.round(current);
-    }
-
-    if (iterations >= maxIterations) {
-      console.error(
-        "⚠️ alcanzado maxIterations:",
-        iterations,
-        "— posible bucle infinito o slotDuration demasiado pequeño"
-      );
-    }
-
-    // Detectar duplicados (si los hay)
-    const unique = [...new Set(slots)];
-    if (unique.length !== slots.length) {
-      const duplicates = slots.filter((s, i) => slots.indexOf(s) !== i);
-      console.warn("⚠️ Se detectaron slots duplicados:", duplicates);
-    }
-
-    return unique;
-  };
-
-  const days = React.useMemo(() => generateDays(), [calendarConfig]);
-  const timeSlots = React.useMemo(() => generateTimeSlots(), [calendarConfig]);
-
-  // Función para filtrar citas por día y hora específica
-  const getAppointmentsForSlot = (dayNumber: number, time: string) => {
-    return appointments.filter((apt) => {
-      const aptDate = new Date(apt.startHour);
-      const aptDay = aptDate.getDay() === 0 ? 7 : aptDate.getDay(); // Convertir domingo de 0 a 7
-      const aptTime = aptDate.toTimeString().slice(0, 5);
-
-      // Verificar que la cita esté en la semana actual
-      const weekStart = new Date(currentWeekStart);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(
-        weekStart.getDate() +
-          (parseInt(calendarConfig.endDay) - parseInt(calendarConfig.startDay))
-      );
-
-      const isInCurrentWeek = aptDate >= weekStart && aptDate <= weekEnd;
-
-      return isInCurrentWeek && aptDay === dayNumber && aptTime === time;
-    });
-  };
 
   // Función para formatear la fecha
   const formatDate = (date: Date) => {
@@ -222,12 +219,12 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
           <div className="text-sm font-medium text-muted-foreground p-2 h-12 border-b">
             Hora
           </div>
-          {timeSlots.map((time) => (
+          {timeSlots.map((slot) => (
             <div
-              key={time}
+              key={slot.startHour}
               className="text-xs text-muted-foreground p-1 h-10 border-b flex items-center"
             >
-              {time}
+              {slot.startHour} - {slot.endHour}
             </div>
           ))}
         </div>
@@ -247,14 +244,25 @@ function WeeklyView({ appointments, calendarConfig }: WeeklyViewProps) {
 
           {/* Slots de tiempo para cada día */}
           <div className="space-y-0">
-            {timeSlots.map((time) => (
-              <div key={time} className="flex">
-                {days.map((day) => (
-                  <TimeSlot
-                    key={`${day.number}-${time}`}
-                    appointments={getAppointmentsForSlot(day.number, time)}
-                  />
-                ))}
+            {timeSlots.map((slot) => (
+              <div key={slot.startHour} className="flex">
+                {days.map((day) => {
+                  // Calcular la fecha del día correspondiente
+                  const dayDate = new Date(currentWeekStart);
+                  dayDate.setDate(currentWeekStart.getDate() + (day.number - parseInt(calendarConfig.startDay)));
+                  
+                  return (
+                    <TimeSlot
+                      key={`${day.number}-${slot.startHour}`}
+                      startHour={slot.startHour}
+                      endHour={slot.endHour}
+                      dayDate={dayDate}
+                      appointments={appointments}
+                      organizationId={organizationId}
+                      onAppointmentCreated={onAppointmentCreated}
+                    />
+                  );
+                })}
               </div>
             ))}
           </div>

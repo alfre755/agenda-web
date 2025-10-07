@@ -125,6 +125,7 @@ export const calendar = pgTable("calendar", {
 
 export const client = pgTable("client", {
   id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  rut: text("rut").notNull().unique(), // RUT como campo único pero no primary key
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),

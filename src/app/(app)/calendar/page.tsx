@@ -3,13 +3,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import CalendarView from "@/components/calendar/CalendarView";
 import { useBackend } from "@/hooks/use-backend-context";
+import { useAuth } from "@/hooks/use-auth";
 import type { AppointmentWithRelations } from "@/types/appointments";
 
 export default function CalendarPage() {
   const backendHandler = useBackend();
+  const { session } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentWithRelations[]>(
     []
   );
+  console.log(session);
   const [calendarConfig, setCalendarConfig] = useState<any | null>(
     null
   );
@@ -52,6 +55,11 @@ export default function CalendarPage() {
     fetchCalendarConfig();
   }, [fetchCalendarConfig]);
 
+  const handleAppointmentCreated = useCallback(() => {
+    // Refrescar la lista de appointments cuando se crea uno nuevo
+    fetchAppointments();
+  }, [fetchAppointments]);
+
   return (
     <div>
       {loading ? (
@@ -60,7 +68,12 @@ export default function CalendarPage() {
         </div>
       ) : (
         <div>
-          <CalendarView appointments={appointments} calendarConfig={calendarConfig} />
+          <CalendarView 
+            appointments={appointments} 
+            calendarConfig={calendarConfig}
+            organizationId={(session as any)?.activeOrganizationId || "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5"}
+            onAppointmentCreated={handleAppointmentCreated}
+          />
         </div>
       )}
     </div>

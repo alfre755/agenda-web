@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (clientId) {
-      filters.push(eq(appointment.clientId, clientId));
+      filters.push(eq(appointment.clientId, parseInt(clientId)));
     }
     
     if (status) {
@@ -68,6 +68,8 @@ export async function GET(request: NextRequest) {
         updatedAt: appointment.updatedAt,
         
         // Datos del cliente
+        clientId: client.id,
+        clientRut: client.rut,
         clientName: client.name,
         clientEmail: client.email,
         clientPhone: client.phone,
@@ -121,14 +123,10 @@ export async function POST(request: NextRequest) {
     // Validar datos
     const validatedData = CreateAppointmentSchema.parse(body);
 
-    // Generar ID único
-    const appointmentId = `apt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Crear appointment
-    const [_newAppointment] = await db
+    // Crear appointment (el ID se genera automáticamente)
+    const [newAppointment] = await db
       .insert(appointment)
       .values({
-        id: appointmentId,
         clientId: validatedData.clientId,
         startHour: new Date(validatedData.startHour),
         endHour: new Date(validatedData.endHour),
@@ -153,6 +151,8 @@ export async function POST(request: NextRequest) {
         createdAt: appointment.createdAt,
         updatedAt: appointment.updatedAt,
         
+        clientId: client.id,
+        clientRut: client.rut,
         clientName: client.name,
         clientEmail: client.email,
         clientPhone: client.phone,
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
       .leftJoin(client, eq(appointment.clientId, client.id))
       .leftJoin(organization, eq(appointment.organizationId, organization.id))
       .leftJoin(user, eq(appointment.createdById, user.id))
-      .where(eq(appointment.id, appointmentId));
+      .where(eq(appointment.id, newAppointment.id));
 
     return NextResponse.json({
       success: true,
