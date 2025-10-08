@@ -31,7 +31,7 @@ export function useBackend(): BackendContextObject {
   return context;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 // API endpoints constants
 const APPOINTMENTS_ENDPOINT = "/api/appointments";
