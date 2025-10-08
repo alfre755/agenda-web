@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { AppointmentForm } from "@/components/forms/AppointmentForm";
+import { ClientModal } from "@/components/modals/ClientModal";
 import { useAppointments } from "@/hooks/use-appointments";
 import { useBackend } from "@/hooks/use-backend-context";
 import type { CreateAppointmentData } from "@/types/appointments";
@@ -37,6 +38,8 @@ export function AppointmentModal({
 }: AppointmentModalProps) {
   const { createAppointment, loading } = useAppointments();
   const backend = useBackend();
+  const [showClientModal, setShowClientModal] = React.useState(false);
+  const [pendingRut, setPendingRut] = React.useState("");
 
   const handleSubmit = async (data: {
     clientRut: string;
@@ -67,7 +70,7 @@ export function AppointmentModal({
         }
       } catch {
         // El cliente no existe, lo crearemos
-        console.warn("Cliente no encontrado, se creará uno nuevo");
+        toast.info("Cliente no encontrado, se creará uno nuevo");
       }
 
       // Si el cliente no existe, crearlo
@@ -79,6 +82,7 @@ export function AppointmentModal({
           phone: data.clientPhone || "",
           organizationId: organizationId || "default-org-id",
         });
+        toast.success("Cliente creado exitosamente");
       }
 
       // Preparar los datos del appointment
@@ -93,35 +97,60 @@ export function AppointmentModal({
 
       await createAppointment(appointmentData);
       
-      toast.success("Appointment creado exitosamente");
+      toast.success("Cita creada exitosamente");
       onClose();
       onAppointmentCreated?.();
     } catch (error) {
-      console.error("Error creating appointment:", error);
-      toast.error("Error al crear el appointment");
+      toast.error("Error al crear la cita");
     }
   };
 
   const handleClose = () => {
+    setShowClientModal(false);
+    setPendingRut("");
     onClose();
+  };
+
+  const handleClientNotFound = (rut: string) => {
+    setPendingRut(rut);
+    setShowClientModal(true);
+  };
+
+  const handleClientCreated = (client: any) => {
+    setShowClientModal(false);
+    setPendingRut("");
+    // Actualizar el formulario con los datos del cliente recién creado
+    if ((window as any).updateFormWithClientData) {
+      (window as any).updateFormWithClientData(client);
+    }
+    toast.success("Cliente creado exitosamente. Formulario actualizado.");
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nuevo Appointment</DialogTitle>
+          <DialogTitle>Nueva Cita</DialogTitle>
           <DialogDescription>
-            Crear un appointment para el {dayDate.toLocaleDateString("es-ES")} de {startHour} a {endHour}
+            Crear una cita para el {dayDate.toLocaleDateString("es-ES")} de {startHour} a {endHour}
           </DialogDescription>
         </DialogHeader>
 
         <AppointmentForm
           onSubmit={handleSubmit}
+          onClientNotFound={handleClientNotFound}
+          onClientCreated={handleClientCreated}
           disabled={loading}
-          submitText={loading ? "Creando..." : "Crear Appointment"}
+          submitText={loading ? "Creando..." : "Crear Cita"}
         />
       </DialogContent>
+
+      <ClientModal
+        isOpen={showClientModal}
+        onClose={() => setShowClientModal(false)}
+        onClientCreated={handleClientCreated}
+        initialRut={pendingRut}
+      />
     </Dialog>
   );
 }

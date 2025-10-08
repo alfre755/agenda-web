@@ -123,11 +123,27 @@ export async function POST(request: NextRequest) {
     // Validar datos
     const validatedData = CreateAppointmentSchema.parse(body);
 
+    // Buscar cliente por RUT (debe existir previamente)
+    const existingClient = await db
+      .select()
+      .from(client)
+      .where(eq(client.rut, validatedData.clientRut))
+      .limit(1);
+
+    if (existingClient.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Cliente no encontrado. Debe crear el cliente primero." },
+        { status: 404 }
+      );
+    }
+
+    const clientRecord = existingClient[0];
+
     // Crear appointment (el ID se genera automáticamente)
     const [newAppointment] = await db
       .insert(appointment)
       .values({
-        clientId: validatedData.clientId,
+        clientId: clientRecord.id,
         startHour: new Date(validatedData.startHour),
         endHour: new Date(validatedData.endHour),
         status: validatedData.status,
