@@ -1,13 +1,14 @@
 "use client"
+import { Building2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Settings,Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, Users, Building2, ChevronLeft, ChevronRight, Settings } from "lucide-react";
+
 import { AppButton } from "@/components/AppButton";
+import { useUsers } from "@/hooks/use-users";
 // ThemeToggle solo en top bar
 import { authClient } from "@/lib/auth-client";
-import { useUsers } from "@/hooks/use-users";
+import { cn } from "@/lib/utils";
 // Perfil/Dropdown solo en top bar
 
 const NAV_ITEMS = [

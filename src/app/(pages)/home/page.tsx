@@ -1,10 +1,11 @@
 "use client"
-import Navbar from "@/components/Navbar";
-import Link from "next/link";
+import { CalendarClock, PanelsTopLeft,ShieldCheck } from "lucide-react";
 import Image from "next/image";
-import { FeatureCard } from "@/components/FeatureCard";
+import Link from "next/link";
+
 import { AppButton } from "@/components/AppButton";
-import { CalendarClock, ShieldCheck, PanelsTopLeft } from "lucide-react";
+import { FeatureCard } from "@/components/FeatureCard";
+import Navbar from "@/components/Navbar";
 
 export default function HomePage() {
   return (

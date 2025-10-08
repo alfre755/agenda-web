@@ -1,9 +1,10 @@
 "use client"
 import { z } from "zod";
-import { useZodForm } from "@/hooks/use-zod-form";
+
+import { AppButton } from "@/components/AppButton";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AppButton } from "@/components/AppButton";
+import { useZodForm } from "@/hooks/use-zod-form";
 
 const schema = z.object({
   email: z.string().email({ message: "Email inválido" }),

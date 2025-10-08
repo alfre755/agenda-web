@@ -1,15 +1,16 @@
 "use client";
+import { ClockIcon, DollarSignIcon,EditIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { PlusIcon, EditIcon, ClockIcon, DollarSignIcon } from "lucide-react";
 import { useScheduling } from "@/hooks/use-scheduling";
-import { toast } from "sonner";
 
 interface ServicesManagerProps {
   organizationId: string;

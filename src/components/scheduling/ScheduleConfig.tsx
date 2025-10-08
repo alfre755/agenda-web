@@ -1,13 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import { ClockIcon, SaveIcon } from "lucide-react";
+import { useEffect,useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ClockIcon, SaveIcon } from "lucide-react";
 import { useScheduling } from "@/hooks/use-scheduling";
-import { toast } from "sonner";
 
 interface ScheduleConfigProps {
   organizationId: string;

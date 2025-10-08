@@ -1,13 +1,19 @@
 "use client"
 import { authClient } from "@/lib/auth-client";
+import { useBackend } from "@/hooks/use-backend-context";
 
 export function useOrganizations() {
+  const backend = useBackend();
+
   async function listOrganizations(params?: any) {
-    // @ts-expect-error depende de versión/plugin
-    if (authClient.admin?.listOrganizations) return authClient.admin.listOrganizations(params);
-    // @ts-expect-error
-    if (authClient.organization?.list) return authClient.organization.list(params);
-    return { data: null, error: { message: "listOrganizations no disponible" } } as const;
+
+    const response = await backend.organizations.listar(params);
+    
+    if (!response.success) {
+      return { data: null, error: { message: response.message } };
+    }
+    
+    return { data: response.data, error: null };
   }
 
   async function createOrganization(payload: { name: string; slug: string; logo?: string; metadata?: Record<string, any>; keepCurrentActiveOrganization?: boolean }) {

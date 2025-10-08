@@ -1,188 +1,175 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useBackend } from "./use-backend";
 
-interface OrganizationSchedule {
-  id: string;
+import { useState, useCallback } from "react";
+
+interface Schedule {
+  id?: string;
   dayOfWeek: number;
   startTime: string;
   endTime: string;
   isActive: boolean;
+  organizationId: string;
 }
 
 interface Service {
-  id: string;
+  id?: string;
   name: string;
   description?: string;
   duration: number; // en minutos
-  price?: number; // en centavos
+  price: number; // en centavos
   color: string;
-  isActive: boolean;
-}
-
-interface Appointment {
-  id: string;
-  serviceId: string;
-  clientName: string;
-  clientEmail: string;
-  clientPhone?: string;
-  start: string;
-  end: string;
-  status: "confirmed" | "cancelled" | "completed";
-  notes?: string;
-  service?: Service;
-}
-
-interface Availability {
-  id: string;
-  type: "blocked" | "special_hours" | "break";
-  title: string;
-  start: string;
-  end: string;
-  isRecurring: boolean;
-  recurringPattern?: any;
+  organizationId: string;
 }
 
 export function useScheduling() {
-  const { get, post } = useBackend();
-  const [schedules, setSchedules] = useState<OrganizationSchedule[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [availability, setAvailability] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Cargar horarios de la organización
-  const loadSchedules = async (organizationId: string) => {
+  const loadSchedules = useCallback(async (organizationId: string) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await get(`/api/organizations/${organizationId}/schedules`);
-      setSchedules(data);
+      const response = await fetch(`/api/calendar-config?organizationId=${organizationId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSchedules(data.schedules || []);
+      }
     } catch (error) {
       console.error("Error loading schedules:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Cargar servicios de la organización
-  const loadServices = async (organizationId: string) => {
+  const saveSchedule = useCallback(async (organizationId: string, schedule: Omit<Schedule, "organizationId">) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await get(`/api/organizations/${organizationId}/services`);
-      setServices(data);
-    } catch (error) {
-      console.error("Error loading services:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const response = await fetch("/api/calendar-config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          organizationId,
+          ...schedule,
+        }),
+      });
 
-  // Cargar citas de la organización
-  const loadAppointments = async (organizationId: string, startDate?: string, endDate?: string) => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (startDate) params.append("start", startDate);
-      if (endDate) params.append("end", endDate);
-      
-      const data = await get(`/api/organizations/${organizationId}/appointments?${params}`);
-      setAppointments(data);
-    } catch (error) {
-      console.error("Error loading appointments:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Crear/actualizar horario
-  const saveSchedule = async (organizationId: string, schedule: Partial<OrganizationSchedule>) => {
-    try {
-      const data = await post(`/api/organizations/${organizationId}/schedules`, schedule);
-      await loadSchedules(organizationId);
-      return data;
+      if (response.ok) {
+        const data = await response.json();
+        setSchedules(prev => {
+          const existing = prev.find(s => s.dayOfWeek === schedule.dayOfWeek);
+          if (existing) {
+            return prev.map(s => s.dayOfWeek === schedule.dayOfWeek ? data.schedule : s);
+          } else {
+            return [...prev, data.schedule];
+          }
+        });
+        return data.schedule;
+      } else {
+        throw new Error("Failed to save schedule");
+      }
     } catch (error) {
       console.error("Error saving schedule:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // Crear/actualizar servicio
-  const saveService = async (organizationId: string, service: Partial<Service>) => {
+  const setupDefaultSchedule = useCallback(async (organizationId: string) => {
+    setLoading(true);
     try {
-      const data = await post(`/api/organizations/${organizationId}/services`, service);
-      await loadServices(organizationId);
-      return data;
-    } catch (error) {
-      console.error("Error saving service:", error);
-      throw error;
-    }
-  };
+      const defaultSchedules = [
+        { dayOfWeek: 1, startTime: "08:00", endTime: "18:00", isActive: true }, // Lunes
+        { dayOfWeek: 2, startTime: "08:00", endTime: "18:00", isActive: true }, // Martes
+        { dayOfWeek: 3, startTime: "08:00", endTime: "18:00", isActive: true }, // Miércoles
+        { dayOfWeek: 4, startTime: "08:00", endTime: "18:00", isActive: true }, // Jueves
+        { dayOfWeek: 5, startTime: "08:00", endTime: "18:00", isActive: true }, // Viernes
+        { dayOfWeek: 6, startTime: "08:00", endTime: "17:00", isActive: true }, // Sábado
+        { dayOfWeek: 0, startTime: "09:00", endTime: "13:00", isActive: false }, // Domingo
+      ];
 
-  // Crear cita
-  const createAppointment = async (organizationId: string, appointment: Partial<Appointment>) => {
-    try {
-      const data = await post(`/api/organizations/${organizationId}/appointments`, appointment);
-      await loadAppointments(organizationId);
-      return data;
-    } catch (error) {
-      console.error("Error creating appointment:", error);
-      throw error;
-    }
-  };
-
-  // Obtener horarios disponibles para un servicio en una fecha específica
-  const getAvailableSlots = async (
-    organizationId: string, 
-    serviceId: string, 
-    date: string
-  ) => {
-    try {
-      const data = await get(
-        `/api/organizations/${organizationId}/available-slots?serviceId=${serviceId}&date=${date}`
-      );
-      return data;
-    } catch (error) {
-      console.error("Error getting available slots:", error);
-      throw error;
-    }
-  };
-
-  // Configurar horarios por defecto (Lunes a Viernes 8:00-18:00)
-  const setupDefaultSchedule = async (organizationId: string) => {
-    const defaultSchedules = [
-      { dayOfWeek: 1, startTime: "08:00", endTime: "18:00" }, // Lunes
-      { dayOfWeek: 2, startTime: "08:00", endTime: "18:00" }, // Martes
-      { dayOfWeek: 3, startTime: "08:00", endTime: "18:00" }, // Miércoles
-      { dayOfWeek: 4, startTime: "08:00", endTime: "18:00" }, // Jueves
-      { dayOfWeek: 5, startTime: "08:00", endTime: "18:00" }, // Viernes
-    ];
-
-    try {
       for (const schedule of defaultSchedules) {
         await saveSchedule(organizationId, schedule);
       }
     } catch (error) {
       console.error("Error setting up default schedule:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [saveSchedule]);
+
+  const loadServices = useCallback(async (organizationId: string) => {
+    setLoading(true);
+    try {
+      // Por ahora, retornamos servicios de ejemplo
+      // TODO: Implementar endpoint real para servicios
+      const mockServices: Service[] = [
+        {
+          id: "1",
+          name: "Consulta General",
+          description: "Consulta médica general",
+          duration: 30,
+          price: 5000, // $50.00
+          color: "#3b82f6",
+          organizationId,
+        },
+        {
+          id: "2",
+          name: "Consulta Especializada",
+          description: "Consulta con especialista",
+          duration: 60,
+          price: 10000, // $100.00
+          color: "#10b981",
+          organizationId,
+        },
+      ];
+      setServices(mockServices);
+    } catch (error) {
+      console.error("Error loading services:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const saveService = useCallback(async (organizationId: string, service: Omit<Service, "organizationId">) => {
+    setLoading(true);
+    try {
+      // Por ahora, simulamos el guardado
+      // TODO: Implementar endpoint real para servicios
+      const newService: Service = {
+        ...service,
+        id: service.id || Date.now().toString(),
+        organizationId,
+      };
+
+      setServices(prev => {
+        if (service.id) {
+          return prev.map(s => s.id === service.id ? newService : s);
+        } else {
+          return [...prev, newService];
+        }
+      });
+
+      return newService;
+    } catch (error) {
+      console.error("Error saving service:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return {
-    // Estado
     schedules,
     services,
-    appointments,
-    availability,
     loading,
-
-    // Acciones
     loadSchedules,
-    loadServices,
-    loadAppointments,
     saveSchedule,
-    saveService,
-    createAppointment,
-    getAvailableSlots,
     setupDefaultSchedule,
+    loadServices,
+    saveService,
   };
 }

@@ -22,7 +22,7 @@ export async function signUpInitialUser(params: SignUpParams) {
       },
       onError: (ctx) => {
         // surface the error to caller too
-        // eslint-disable-next-line no-alert
+         
         alert(ctx.error.message);
       },
     }

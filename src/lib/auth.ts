@@ -1,10 +1,51 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db"; // your drizzle instance
 import { organization } from "better-auth/plugins";
 import { admin } from "better-auth/plugins";
-import { ac, roles } from "@/lib/permissions";
+
 import { sendEmail } from "@/lib/mail";
+import { ac, roles } from "@/lib/permissions";
+import { eq } from "drizzle-orm";
+
+import { db } from "./db"; // your drizzle instance
+import { member, organization as organizationTable } from "./db/schema";
+
+// Función para obtener la organización activa del usuario
+async function getActiveOrganization(userId: string) {
+  try {
+    // Buscar la primera organización del usuario
+    const userOrganization = await db
+      .select({
+        id: organizationTable.id,
+        name: organizationTable.name,
+        slug: organizationTable.slug,
+      })
+      .from(organizationTable)
+      .innerJoin(member, eq(organizationTable.id, member.organizationId))
+      .where(eq(member.userId, userId))
+      .limit(1);
+
+    if (userOrganization.length > 0) {
+      return userOrganization[0];
+    }
+
+    // Si no tiene organizaciones, crear una por defecto o usar una existente
+    // Por ahora, retornar una organización por defecto
+    return {
+      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
+      name: "Default Organization",
+      slug: "default-org",
+    };
+  } catch (error) {
+    console.error("Error getting user organization:", error);
+    // Fallback a organización por defecto
+    return {
+      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
+      name: "Default Organization", 
+      slug: "default-org",
+    };
+  }
+}
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || process.env.BASE_URL || "http://localhost:3000",
@@ -19,6 +60,21 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg", // or "mysql", "sqlite"
   }),
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const organization = await getActiveOrganization(session.userId);
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: organization.id,
+            },
+          };
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,

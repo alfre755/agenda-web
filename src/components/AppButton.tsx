@@ -1,6 +1,7 @@
 "use client"
-import { Button } from "@/components/ui/button";
 import type { ComponentProps } from "react";
+
+import { Button } from "@/components/ui/button";
 
 export type AppButtonType = "primary" | "secondary" | "outlineLight" | "danger";
 

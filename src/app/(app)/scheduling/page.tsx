@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { CalendarIcon, ClockIcon,SettingsIcon } from "lucide-react";
+import {useState } from "react";
+
 import { ScheduleConfig } from "@/components/scheduling/ScheduleConfig";
 import { ServicesManager } from "@/components/scheduling/ServicesManager";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarIcon, SettingsIcon, ClockIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function SchedulingPage() {
@@ -12,7 +13,7 @@ export default function SchedulingPage() {
   const [activeTab, setActiveTab] = useState("schedule");
 
   // Obtener la organización activa del usuario
-  const organizationId = (session as any)?.user?.activeOrganizationId;
+  const organizationId = (session as any)?.activeOrganizationId;
 
   if (!organizationId) {
     return (

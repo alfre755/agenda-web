@@ -1,12 +1,15 @@
 "use client"
-import { useAuth } from "@/hooks/use-auth";
 import { useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
-import { Input } from "@/components/ui/input";
-import { AppButton } from "@/components/AppButton";
+import { useState } from "react";
 import { toast } from "sonner";
 
-function VerifyEmailForm() {
+import { AppButton } from "@/components/AppButton";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
+
+export const dynamic = 'force-dynamic';
+
+export default function VerifyEmailPage() {
   const { sendVerificationEmail } = useAuth();
   const params = useSearchParams();
   const initialEmail = params.get("email") || "";
@@ -44,20 +47,5 @@ function VerifyEmailForm() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function VerifyEmailPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm space-y-4">
-          <h1 className="text-2xl font-semibold tracking-tight">Verificar email</h1>
-          <p className="text-sm text-muted-foreground">Cargando...</p>
-        </div>
-      </div>
-    }>
-      <VerifyEmailForm />
-    </Suspense>
   );
 }
