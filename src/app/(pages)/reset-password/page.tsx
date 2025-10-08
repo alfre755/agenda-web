@@ -7,6 +7,8 @@ import { AppButton } from "@/components/AppButton";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 
+export const dynamic = 'force-dynamic';
+
 export default function ResetPasswordPage() {
   const { resetPassword } = useAuth();
   const params = useSearchParams();
