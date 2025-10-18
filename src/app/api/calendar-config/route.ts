@@ -9,10 +9,12 @@ import { calendar_config } from "@/lib/db/schema";
 const ADMIN_ROLES = ["admin", "superadmin"] as const;
 const FORBIDDEN_MESSAGE = "Forbidden: Admin access required";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Check authentication and authorization
-    const session = await auth.api.getSession({ headers: {} });
+    const session = await auth.api.getSession({ 
+      headers: request.headers 
+    });
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Unauthorized", data: null },
@@ -55,7 +57,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication and authorization
-    const session = await auth.api.getSession({ headers: {} });
+    const session = await auth.api.getSession({ 
+      headers: request.headers 
+    });
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Unauthorized", data: null },
@@ -116,7 +120,9 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // Check authentication and authorization
-    const session = await auth.api.getSession({ headers: {} });
+    const session = await auth.api.getSession({ 
+      headers: request.headers 
+    });
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Unauthorized", data: null },
