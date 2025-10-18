@@ -48,7 +48,7 @@ export function Sidebar() {
             const isUser = hasRole("user") && !isAdmin && !isSuperAdmin;
 
             if (isUser) {
-              const allowed = href === "/dashboard" || href === "/calendar" || href === "/calendar-config" || href === "/settings";
+              const allowed = href === "/dashboard" || href === "/calendar" || href === "/settings";
               if (!allowed) return null;
             }
             // Simple resource-permission mapping for visibility
@@ -56,6 +56,7 @@ export function Sidebar() {
               href === "/users" ? { user: ["list" as const] } :
               href === "/organizations" ? { organization: ["list" as const] } :
               href === "/calendar" ? { calendar: ["list" as const] } :
+              href === "/calendar-config" ? { calendarConfig: ["list" as const] } :
               undefined
             );
             // If a mapping exists, check permission on client plugin
