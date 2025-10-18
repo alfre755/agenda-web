@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { AppointmentModal } from "./AppointmentModal";
+
 import { AppointmentInfoModal } from "./AppointmentInfoModal";
+import { AppointmentModal } from "./AppointmentModal";
 
 interface Appointment {
   id: string;
@@ -94,10 +95,10 @@ function TimeSlot({
     <>
       <div
         onClick={handleOnClick}
-        className="w-full h-10 rounded-md bg-background border border-border hover:bg-gray-50 cursor-pointer overflow-hidden"
+        className="w-full h-10 md:h-8 lg:h-10 rounded-md bg-background border border-border hover:bg-gray-50 cursor-pointer overflow-hidden"
       >
         {filteredAppointments && filteredAppointments.length > 0 ? (
-          <div className="p-1">
+          <div className="h-full">
             {filteredAppointments.map((appointment, index) => {
               // Determinar el color según el estado
               const getStatusColor = (status: string) => {
@@ -116,19 +117,22 @@ function TimeSlot({
               return (
                 <div
                   key={index}
-                  className={`text-xs ${getStatusColor(
+                  className={`h-full w-full text-xs ${getStatusColor(
                     appointment.status
-                  )} rounded px-1`}
+                  )} rounded flex flex-col justify-center px-2`}
                 >
-                  <div className="font-medium">{appointment.client?.name || appointment.clientName || 'Sin nombre'}</div>
-                  <div className="text-xs opacity-75">{appointment.status}</div>
+                  <div className="font-medium truncate text-xs lg:text-sm">
+                    {appointment.client?.name || appointment.clientName || 'Sin nombre'}
+                  </div>
+                  <div className="text-xs opacity-75 hidden lg:block">{appointment.status}</div>
                 </div>
               );
             })}
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-            Disponible
+            <span className="hidden lg:inline">Disponible</span>
+            <span className="lg:hidden">+</span>
           </div>
         )}
       </div>
@@ -147,12 +151,12 @@ function TimeSlot({
         isOpen={isInfoModalOpen}
         onClose={() => setIsInfoModalOpen(false)}
         appointment={selectedAppointment}
-        onEdit={(appointment) => {
+        onEdit={(_appointment) => {
           // TODO: Implementar edición
           // Por ahora solo cerramos el modal
           setIsInfoModalOpen(false);
         }}
-        onDelete={(appointmentId) => {
+        onDelete={(_appointmentId) => {
           // TODO: Implementar eliminación
           // Por ahora solo cerramos el modal
           setIsInfoModalOpen(false);

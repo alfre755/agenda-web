@@ -7,7 +7,7 @@ import { type Column,DataTable } from "@/components/data-table/DataTable";
 import { EntityFormDialog } from "@/components/entity/EntityFormDialog";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { UserForm } from "@/components/forms/UserForm";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAdmin } from "@/hooks/use-admin";
 import { useUsers } from "@/hooks/use-users";
@@ -99,6 +99,9 @@ export default function UsersPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Agregar usuario</DialogTitle>
+              <DialogDescription>
+                Complete la información para crear un nuevo usuario en el sistema
+              </DialogDescription>
             </DialogHeader>
             <UserForm
               submitText={isSaving ? "Guardando..." : "Guardar"}

@@ -1,5 +1,5 @@
 "use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function EntityFormDialog({
   open,
@@ -17,6 +17,9 @@ export function EntityFormDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            Complete el formulario con la información requerida
+          </DialogDescription>
         </DialogHeader>
         {children}
       </DialogContent>
