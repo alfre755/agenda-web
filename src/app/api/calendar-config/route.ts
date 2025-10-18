@@ -5,10 +5,10 @@ import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const configs = await db.select().from(calendar_config);
+    const configs = await db.select().from(calendar_config).orderBy(calendar_config.createdAt);
     
-    // Devolver solo la primera configuración o null si no hay ninguna
-    const config = configs.length > 0 ? configs[0] : null;
+    // Devolver la configuración más reciente o null si no hay ninguna
+    const config = configs.length > 0 ? configs[configs.length - 1] : null;
     
     return NextResponse.json({
       success: true,
