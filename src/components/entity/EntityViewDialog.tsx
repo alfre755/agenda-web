@@ -1,7 +1,7 @@
 "use client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 type Renderer = (value: any, key: string, all: Record<string, any>) => React.ReactNode;
@@ -67,6 +67,9 @@ export function EntityViewDialog({
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            Información detallada del elemento seleccionado
+          </DialogDescription>
         </DialogHeader>
 
         {(name || email || image || role) && (

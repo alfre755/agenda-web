@@ -1,9 +1,29 @@
 "use client";
+
 import React from "react";
+
 import TimeSlot from "./TimeSlot";
 
+interface Appointment {
+  id: string;
+  startHour: string;
+  endHour: string;
+  status: "in-progress" | "completed" | "cancelled";
+  observation?: string;
+  client?: {
+    name: string;
+    rut: string;
+    email?: string;
+    phone?: string;
+  };
+  clientName?: string;
+  clientRut?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+}
+
 interface WeeklyViewProps {
-  appointments: any[];
+  appointments: Appointment[];
   calendarConfig: {
     startDay: string;
     endDay: string;
@@ -16,20 +36,21 @@ interface WeeklyViewProps {
 }
 
 function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmentCreated }: WeeklyViewProps) {
-  // Mapeo de días de la semana
-  const dayNames = {
-    "1": "Lunes",
-    "2": "Martes",
-    "3": "Miércoles",
-    "4": "Jueves",
-    "5": "Viernes",
-    "6": "Sábado",
-    "7": "Domingo",
-  };
-
   // Generar días de la semana basados en la configuración
-  const generateDays = () => {
+  const generateDays = React.useCallback(() => {
     if (!calendarConfig) return [];
+    
+    // Mapeo de días de la semana
+    const dayNames = {
+      "1": "Lunes",
+      "2": "Martes",
+      "3": "Miércoles",
+      "4": "Jueves",
+      "5": "Viernes",
+      "6": "Sábado",
+      "7": "Domingo",
+    };
+    
     const startDay = parseInt(calendarConfig.startDay);
     const endDay = parseInt(calendarConfig.endDay);
     const days = [];
@@ -42,7 +63,7 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
     }
 
     return days;
-  };
+  }, [calendarConfig]);
 
   // Helpers
   const parseSlotDuration = (val: string | number) => {
@@ -60,7 +81,7 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
     return m ? Number(m[0]) : NaN;
   };
 
-  const generateTimeSlots = () => {
+  const generateTimeSlots = React.useCallback(() => {
     if (!calendarConfig) return [];
     const { startHourCalendar, endHourCalendar, slotDurationCalendar } =
       calendarConfig;
@@ -151,11 +172,11 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
     }
 
     return unique;
-  };
+  }, [calendarConfig]);
 
   // Hooks
-  const days = React.useMemo(() => generateDays(), [calendarConfig]);
-  const timeSlots = React.useMemo(() => generateTimeSlots(), [calendarConfig]);
+  const days = React.useMemo(() => generateDays(), [generateDays]);
+  const timeSlots = React.useMemo(() => generateTimeSlots(), [generateTimeSlots]);
 
   if (!calendarConfig) {
     return (
@@ -205,15 +226,100 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
   );
 
   return (
-    <div className="p-6">
+    <div className="p-2 md:p-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold">Vista Semanal</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-lg md:text-xl font-semibold">Vista Semanal</h2>
+        <p className="text-xs md:text-sm text-muted-foreground">
           {formatDate(currentWeekStart)} - {formatDate(weekEnd)}
         </p>
       </div>
 
-      <div className="flex">
+      {/* Mobile: Stack layout */}
+      <div className="block md:hidden">
+        <div className="space-y-3">
+          {days.map((day) => {
+            const dayDate = new Date(currentWeekStart);
+            dayDate.setDate(currentWeekStart.getDate() + (day.number - parseInt(calendarConfig.startDay)));
+            
+            return (
+              <div key={day.number} className="border rounded-lg p-3 bg-card">
+                <div className="font-medium text-sm mb-3 text-center text-foreground">
+                  {day.name} - {dayDate.toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
+                </div>
+                <div className="space-y-1">
+                  {timeSlots.map((slot) => (
+                    <div key={`${day.number}-${slot.startHour}`} className="flex items-center gap-3">
+                      <div className="w-14 text-xs text-muted-foreground font-medium flex-shrink-0 text-center">
+                        {slot.startHour}
+                      </div>
+                      <div className="flex-1">
+                        <TimeSlot
+                          startHour={slot.startHour}
+                          endHour={slot.endHour}
+                          dayDate={dayDate}
+                          appointments={appointments}
+                          organizationId={organizationId}
+                          onAppointmentCreated={onAppointmentCreated}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tablet: Compact horizontal layout */}
+      <div className="hidden md:block lg:hidden">
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max">
+            {/* Columna de horas */}
+            <div className="w-14 flex-shrink-0">
+              <div className="text-xs font-medium text-muted-foreground p-1 h-8 border-b">
+                Hora
+              </div>
+              {timeSlots.map((slot) => (
+                <div
+                  key={slot.startHour}
+                  className="text-xs text-muted-foreground p-1 h-8 border-b flex items-center"
+                >
+                  {slot.startHour}
+                </div>
+              ))}
+            </div>
+
+            {/* Días */}
+            {days.map((day) => {
+              const dayDate = new Date(currentWeekStart);
+              dayDate.setDate(currentWeekStart.getDate() + (day.number - parseInt(calendarConfig.startDay)));
+              
+              return (
+                <div key={day.number} className="w-20 flex-shrink-0">
+                  <div className="text-xs font-medium text-center p-1 h-8 border-b border-l">
+                    {day.name}
+                  </div>
+                  {timeSlots.map((slot) => (
+                    <TimeSlot
+                      key={`${day.number}-${slot.startHour}`}
+                      startHour={slot.startHour}
+                      endHour={slot.endHour}
+                      dayDate={dayDate}
+                      appointments={appointments}
+                      organizationId={organizationId}
+                      onAppointmentCreated={onAppointmentCreated}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: Full grid layout */}
+      <div className="hidden lg:flex">
         {/* Columna de horas a la izquierda */}
         <div className="w-16 flex-shrink-0">
           <div className="text-sm font-medium text-muted-foreground p-2 h-12 border-b">
@@ -229,13 +335,13 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
           ))}
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 overflow-x-auto">
           {/* Headers de días */}
-          <div className="flex">
+          <div className="flex min-w-max">
             {days.map((day) => (
               <div
                 key={day.number}
-                className="flex-1 text-sm font-medium text-center p-2 border-b border-l"
+                className="flex-1 min-w-[120px] text-sm font-medium text-center p-2 border-b border-l"
               >
                 {day.name}
               </div>
@@ -245,7 +351,7 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
           {/* Slots de tiempo para cada día */}
           <div className="space-y-0">
             {timeSlots.map((slot) => (
-              <div key={slot.startHour} className="flex">
+              <div key={slot.startHour} className="flex min-w-max">
                 {days.map((day) => {
                   // Calcular la fecha del día correspondiente
                   const dayDate = new Date(currentWeekStart);

@@ -1,7 +1,7 @@
 "use client"
-import { Building2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Settings,Users } from "lucide-react";
+import { Building2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Cog, Users } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { AppButton } from "@/components/AppButton";
@@ -16,14 +16,13 @@ const NAV_ITEMS = [
   { href: "/organizations", label: "Organizaciones", icon: Building2 },
   { href: "/users", label: "Usuarios", icon: Users },
   { href: "/calendar", label: "Calendario", icon: CalendarIcon },
-  { href: "/scheduling", label: "Agendamiento", icon: Settings },
+  { href: "/calendar-config", label: "Config. Calendario", icon: Cog },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
-  const { currentUser, hasRole } = useUsers();
+  const { hasRole } = useUsers();
 
   return (
     <aside className={cn("border-r h-[calc(100vh-56px)] sticky top-[56px] bg-background transition-[width] duration-200", collapsed ? "w-16" : "w-72")}> 
@@ -49,18 +48,19 @@ export function Sidebar() {
             const isUser = hasRole("user") && !isAdmin && !isSuperAdmin;
 
             if (isUser) {
-              const allowed = href === "/dashboard" || href === "/calendar" || href === "/scheduling" || href === "/settings";
+              const allowed = href === "/dashboard" || href === "/calendar" || href === "/settings";
               if (!allowed) return null;
             }
             // Simple resource-permission mapping for visibility
             const required = (
-              href === "/users" ? { user: ["list"] } :
-              href === "/organizations" ? { organization: ["list"] } :
-              href === "/calendar" ? { calendar: ["list"] } :
+              href === "/users" ? { user: ["list" as const] } :
+              href === "/organizations" ? { organization: ["list" as const] } :
+              href === "/calendar" ? { calendar: ["list" as const] } :
+              href === "/calendar-config" ? { calendarConfig: ["list" as const] } :
               undefined
             );
             // If a mapping exists, check permission on client plugin
-            if (required && !authClient.admin.checkRolePermission({ permissions: required, role: (typeof window !== "undefined" ? undefined : undefined) as any })) {
+            if (required && !authClient.admin.checkRolePermission({ permissions: required, role: "user" })) {
               // We can't synchronously know user role here; prefer to show and guard server-side or fetch role from session.
             }
             const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));

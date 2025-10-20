@@ -3,7 +3,7 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 
 import { AppButton } from "@/components/AppButton";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 import { Sidebar } from "./Sidebar";
 
@@ -18,6 +18,12 @@ export function MobileSidebar() {
           </AppButton>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-[280px]">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Menú de navegación</SheetTitle>
+            <SheetDescription>
+              Menú de navegación principal de la aplicación
+            </SheetDescription>
+          </SheetHeader>
           <Sidebar />
         </SheetContent>
       </Sheet>

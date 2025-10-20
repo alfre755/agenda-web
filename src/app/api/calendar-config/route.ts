@@ -1,14 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { calendar_config } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
-export async function GET() {
+const ADMIN_ROLES = ["admin", "superadmin"] as const;
+const FORBIDDEN_MESSAGE = "Forbidden: Admin access required";
+
+export async function GET(request: NextRequest) {
   try {
-    const configs = await db.select().from(calendar_config);
+    // Check authentication and authorization
+    const session = await auth.api.getSession({ 
+      headers: request.headers 
+    });
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized", data: null },
+        { status: 401 }
+      );
+    }
+
+    // Check if user has admin or superadmin role
+    const userRole = session.user.role;
+    if (!ADMIN_ROLES.includes(userRole as "admin" | "superadmin")) {
+      return NextResponse.json(
+        { success: false, message: FORBIDDEN_MESSAGE, data: null },
+        { status: 403 }
+      );
+    }
+
+    const configs = await db.select().from(calendar_config).orderBy(calendar_config.createdAt);
     
-    // Devolver solo la primera configuración o null si no hay ninguna
-    const config = configs.length > 0 ? configs[0] : null;
+    // Devolver la configuración más reciente o null si no hay ninguna
+    const config = configs.length > 0 ? configs[configs.length - 1] : null;
     
     return NextResponse.json({
       success: true,
@@ -30,6 +56,26 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication and authorization
+    const session = await auth.api.getSession({ 
+      headers: request.headers 
+    });
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized", data: null },
+        { status: 401 }
+      );
+    }
+
+    // Check if user has admin or superadmin role
+    const userRole = session.user.role;
+    if (!ADMIN_ROLES.includes(userRole as "admin" | "superadmin")) {
+      return NextResponse.json(
+        { success: false, message: FORBIDDEN_MESSAGE, data: null },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { 
       calendarId, 
@@ -73,6 +119,26 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Check authentication and authorization
+    const session = await auth.api.getSession({ 
+      headers: request.headers 
+    });
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized", data: null },
+        { status: 401 }
+      );
+    }
+
+    // Check if user has admin or superadmin role
+    const userRole = session.user.role;
+    if (!ADMIN_ROLES.includes(userRole as "admin" | "superadmin")) {
+      return NextResponse.json(
+        { success: false, message: FORBIDDEN_MESSAGE, data: null },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { 
       id, 
