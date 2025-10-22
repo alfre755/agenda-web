@@ -8,7 +8,7 @@ import { ac, roles } from "@/lib/permissions";
 const baseURL = (() => {
   // En el servidor (SSR), usar variable de entorno
   if (typeof window === "undefined") {
-    return process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    return process.env.BETTER_AUTH_URL || process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   }
   
   // En el cliente, usar window.location.origin si no hay variable de entorno
