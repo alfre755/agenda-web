@@ -18,7 +18,7 @@ interface Appointment {
   id: string;
   startHour: string;
   endHour: string;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   client?: {
     name: string;
@@ -51,8 +51,12 @@ export function AppointmentInfoModal({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "in-progress":
+      case "scheduled":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "confirmed":
         return "bg-blue-100 text-blue-800 border-blue-200";
+      case "in-progress":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       case "completed":
         return "bg-green-100 text-green-800 border-green-200";
       case "cancelled":
@@ -64,6 +68,10 @@ export function AppointmentInfoModal({
 
   const getStatusText = (status: string) => {
     switch (status) {
+      case "scheduled":
+        return "Agendado";
+      case "confirmed":
+        return "Confirmado";
       case "in-progress":
         return "En Progreso";
       case "completed":

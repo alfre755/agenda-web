@@ -46,7 +46,7 @@ export function AppointmentModal({
     clientEmail?: string;
     clientPhone?: string;
     observation?: string;
-    status: "in-progress" | "completed" | "cancelled";
+    status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   }) => {
     try {
       // Crear las fechas de inicio y fin del appointment

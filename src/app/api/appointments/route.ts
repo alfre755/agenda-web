@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (status) {
-      filters.push(eq(appointment.status, status as "in-progress" | "completed" | "cancelled"));
+      filters.push(eq(appointment.status, status as "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled"));
     }
     
     if (startDate) {

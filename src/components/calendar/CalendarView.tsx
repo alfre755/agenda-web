@@ -8,7 +8,7 @@ interface Appointment {
   id: string;
   startHour: string;
   endHour: string;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   client?: {
     name: string;

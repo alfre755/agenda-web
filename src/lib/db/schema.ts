@@ -145,7 +145,7 @@ export const appointment = pgTable("appointment", {
     .references(() => client.id),
   startHour: timestamp("start_hour").notNull(),
   endHour: timestamp("end_hour").notNull(),
-  status: text("status").default("in-progress").notNull(), // in-progress, completed, cancelled
+  status: text("status").default("scheduled").notNull(), // scheduled, confirmed, in-progress, completed, cancelled
   observation: text("observation"),
   organizationId: text("organization_id")
     .notNull()

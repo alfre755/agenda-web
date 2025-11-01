@@ -38,7 +38,7 @@ const schema = z.object({
   clientEmail: z.string().email("Email inválido").optional().or(z.literal("")),
   clientPhone: z.string().optional(),
   observation: z.string().optional(),
-  status: z.enum(["in-progress", "completed", "cancelled"]),
+  status: z.enum(["scheduled", "confirmed", "in-progress", "completed", "cancelled"]),
 });
 
 type Schema = z.infer<typeof schema>;
@@ -74,7 +74,7 @@ export function AppointmentForm({
       clientEmail: "",
       clientPhone: "",
       observation: "",
-      status: "in-progress" as const,
+      status: "scheduled" as const,
       ...defaultValues,
     },
   });
@@ -283,6 +283,8 @@ export function AppointmentForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="scheduled">Agendado</SelectItem>
+                  <SelectItem value="confirmed">Confirmado</SelectItem>
                   <SelectItem value="in-progress">En Progreso</SelectItem>
                   <SelectItem value="completed">Completado</SelectItem>
                   <SelectItem value="cancelled">Cancelado</SelectItem>

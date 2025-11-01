@@ -9,7 +9,7 @@ interface Appointment {
   id: string;
   startHour: string;
   endHour: string;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   client?: {
     name: string;
@@ -103,8 +103,12 @@ function TimeSlot({
               // Determinar el color según el estado
               const getStatusColor = (status: string) => {
                 switch (status) {
-                  case "in-progress":
+                  case "scheduled":
+                    return "bg-yellow-100 text-yellow-800";
+                  case "confirmed":
                     return "bg-blue-100 text-blue-800";
+                  case "in-progress":
+                    return "bg-purple-100 text-purple-800";
                   case "completed":
                     return "bg-green-100 text-green-800";
                   case "cancelled":

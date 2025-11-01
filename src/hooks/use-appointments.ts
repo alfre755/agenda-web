@@ -106,7 +106,7 @@ export function useAppointments() {
 
   const updateAppointmentStatus = useCallback(async (
     appointmentId: string,
-    status: "in-progress" | "completed" | "cancelled"
+    status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled"
   ) => {
     return updateAppointment({
       id: appointmentId,
