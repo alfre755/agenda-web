@@ -1,8 +1,11 @@
 "use client";
 
+import { Calendar, Clock, FileText,Mail, Phone, User } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User, Mail, Phone, FileText } from "lucide-react";
 
 interface Appointment {
   id: string;

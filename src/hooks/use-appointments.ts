@@ -1,7 +1,9 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useCallback,useState } from "react";
+
+import type { AppointmentFilters, CreateAppointmentData, UpdateAppointmentData } from "@/types/appointments";
+
 import { useBackend } from "./use-backend-context";
-import { AppointmentWithRelations, AppointmentFilters, CreateAppointmentData, UpdateAppointmentData } from "@/types/appointments";
 
 export function useAppointments() {
   const backend = useBackend();

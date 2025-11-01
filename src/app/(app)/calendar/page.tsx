@@ -2,8 +2,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import CalendarView from "@/components/calendar/CalendarView";
-import { useBackend } from "@/hooks/use-backend-context";
 import { useAuth } from "@/hooks/use-auth";
+import { useBackend } from "@/hooks/use-backend-context";
 import type { AppointmentWithRelations } from "@/types/appointments";
 
 export default function CalendarPage() {

@@ -2,10 +2,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { admin } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import { sendEmail } from "@/lib/mail";
 import { ac, roles } from "@/lib/permissions";
-import { eq } from "drizzle-orm";
 
 import { db } from "./db"; // your drizzle instance
 import { member, organization as organizationTable } from "./db/schema";

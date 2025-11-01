@@ -1,6 +1,6 @@
 "use client"
-import { authClient } from "@/lib/auth-client";
 import { useBackend } from "@/hooks/use-backend-context";
+import { authClient } from "@/lib/auth-client";
 
 export function useOrganizations() {
   const backend = useBackend();

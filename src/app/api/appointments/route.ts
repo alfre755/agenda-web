@@ -1,10 +1,11 @@
+import { and, desc,eq, gte, lte } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { eq, and, gte, lte, desc } from "drizzle-orm";
-import { CreateAppointmentSchema } from "@/types/appointments";
+
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { appointment, client, organization, user } from "@/lib/db/schema";
+import { CreateAppointmentSchema } from "@/types/appointments";
 
 // GET /api/appointments - Listar appointments
 export async function GET(request: NextRequest) {
