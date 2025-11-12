@@ -18,25 +18,80 @@ export default function CalendarPage() {
     null
   );
   const [loading, setLoading] = useState(true);
+  const [configLoading, setConfigLoading] = useState(true);
 
-  const fetchAppointments = useCallback(async () => {
+  // Calcular las fechas de inicio y fin de la semana actual
+  const getWeekRange = useCallback(() => {
+    if (!calendarConfig) return { startDate: null, endDate: null };
+
+    const today = new Date();
+    const startDay = parseInt(calendarConfig.startDay);
+
+    // Obtener el lunes de la semana actual
+    const monday = new Date(today);
+    const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); // Convertir domingo de 0 a 7
+    const daysToMonday = dayOfWeek - 1;
+    monday.setDate(today.getDate() - daysToMonday);
+
+    // Ajustar al día de inicio configurado
+    const daysToStart = startDay - 1;
+    const weekStart = new Date(monday);
+    weekStart.setDate(monday.getDate() + daysToStart);
+    weekStart.setHours(0, 0, 0, 0); // Inicio del día
+
+    // Calcular el final de la semana
+    const weekEnd = new Date(weekStart);
+    const daysDiff = parseInt(calendarConfig.endDay) - parseInt(calendarConfig.startDay);
+    weekEnd.setDate(weekStart.getDate() + daysDiff);
+    weekEnd.setHours(23, 59, 59, 999); // Final del día
+
+    return {
+      startDate: weekStart.toISOString(),
+      endDate: weekEnd.toISOString(),
+    };
+  }, [calendarConfig]);
+
+  const fetchAppointments = useCallback(async (showLoading = true) => {
+    if (!calendarConfig) return;
+
     try {
-      setLoading(true);
-      const response = await backendHandler.appointments.listar();
-      if (response.success && response.data) {
-        setAppointments(response.data as AppointmentWithRelations[]);
+      if (showLoading) {
+        setLoading(true);
+      }
+      const { startDate, endDate } = getWeekRange();
+      
+      // Construir URL con query params
+      const params = new URLSearchParams();
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
+      const organizationId = (session as any)?.activeOrganizationId || "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5";
+      if (organizationId) params.append("organizationId", organizationId);
+
+      const url = `/api/appointments?${params.toString()}`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+      if (result.success && result.data) {
+        setAppointments(result.data as AppointmentWithRelations[]);
       }
     } catch (error) {
       console.error("❌ Error fetching appointments:", error);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
-  }, [backendHandler.appointments.listar]);
+  }, [calendarConfig, getWeekRange, session]);
 
   
   const fetchCalendarConfig = useCallback(async () => {
     try {
-      setLoading(true);
+      setConfigLoading(true);
       const response = await backendHandler.calendarConfig.listar();
       if (response.success && response.data) {
         setCalendarConfig(response.data as any);
@@ -44,21 +99,23 @@ export default function CalendarPage() {
     } catch (error) {
       console.error("❌ Error fetching calendarConfig:", error);
     } finally {
-      setLoading(false);
+      setConfigLoading(false);
     }
   }, [backendHandler.calendarConfig.listar]);
 
   useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments]);
+    if (calendarConfig) {
+      fetchAppointments();
+    }
+  }, [fetchAppointments, calendarConfig]);
 
   useEffect(() => {
     fetchCalendarConfig();
   }, [fetchCalendarConfig]);
 
   const handleAppointmentCreated = useCallback(() => {
-    // Refrescar la lista de appointments cuando se crea uno nuevo
-    fetchAppointments();
+    // Refrescar la lista de appointments cuando se crea uno nuevo (sin mostrar loading)
+    fetchAppointments(false);
   }, [fetchAppointments]);
 
   const handleStatusChange = useCallback(async (appointmentId: string, newStatus: AppointmentWithRelations["status"]) => {
@@ -66,7 +123,8 @@ export default function CalendarPage() {
       const response = await backendHandler.appointments.modificar({ id: appointmentId, status: newStatus });
       if (response.success) {
         toast.success("Estado actualizado correctamente");
-        await fetchAppointments(); // Refrescar la lista después del cambio
+        // Refrescar la lista después del cambio (sin mostrar loading para evitar parpadeo)
+        await fetchAppointments(false);
       } else {
         toast.error("Error al actualizar el estado");
       }
@@ -93,7 +151,7 @@ export default function CalendarPage() {
 
   return (
     <div>
-      {loading ? (
+      {configLoading || (loading && !calendarConfig) ? (
         <div className="flex items-center justify-center h-96">
           <div className="text-muted-foreground">Cargando eventos...</div>
         </div>

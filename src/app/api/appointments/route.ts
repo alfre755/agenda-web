@@ -45,12 +45,18 @@ export async function GET(request: NextRequest) {
       filters.push(eq(appointment.status, status as "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled"));
     }
     
-    if (startDate) {
-      filters.push(gte(appointment.startHour, new Date(startDate)));
-    }
-    
-    if (endDate) {
-      filters.push(lte(appointment.endHour, new Date(endDate)));
+    // Filtrar appointments que se solapen con el rango de fechas
+    // Un appointment se solapa si: empieza antes del final del rango Y termina después del inicio del rango
+    if (startDate && endDate) {
+      // Appointment que se solapa: startHour <= endDate AND endHour >= startDate
+      filters.push(lte(appointment.startHour, new Date(endDate)));
+      filters.push(gte(appointment.endHour, new Date(startDate)));
+    } else if (startDate) {
+      // Si solo hay startDate, mostrar appointments que terminen después de esa fecha
+      filters.push(gte(appointment.endHour, new Date(startDate)));
+    } else if (endDate) {
+      // Si solo hay endDate, mostrar appointments que empiecen antes de esa fecha
+      filters.push(lte(appointment.startHour, new Date(endDate)));
     }
 
     // Consulta con JOINs para obtener datos relacionados
@@ -69,7 +75,6 @@ export async function GET(request: NextRequest) {
         updatedAt: appointment.updatedAt,
         
         // Datos del cliente
-        clientId: client.id,
         clientRut: client.rut,
         clientName: client.name,
         clientEmail: client.email,
@@ -168,12 +173,16 @@ export async function POST(request: NextRequest) {
         createdAt: appointment.createdAt,
         updatedAt: appointment.updatedAt,
         
-        clientId: client.id,
+        // Datos del cliente
         clientRut: client.rut,
         clientName: client.name,
         clientEmail: client.email,
         clientPhone: client.phone,
+        
+        // Datos de la organización
         organizationName: organization.name,
+        
+        // Datos del creador
         createdByName: user.name,
         createdByEmail: user.email,
       })
