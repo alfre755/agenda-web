@@ -119,18 +119,28 @@ export default function BackendProvider({ children }: BackendProviderProps) {
      * Método privado para crear una solicitud al backend
      * @param {String} url URL correspondiente a la solicitud
      * @param {String} method Método HTTP
+     * @param {Boolean} requiresId Si requiere ID en la URL (para PUT/DELETE con [id])
      * @returns {Function} retorna la función declarada para ser utilizada
      */
-    (url: string, method: string = "GET") => {
+    (url: string, method: string = "GET", requiresId: boolean = false) => {
       return async (data?: unknown): Promise<BackendResponse> => {
         try {
           const requestOptions: RequestInit = { method };
+          let requestUrl = url;
+          
+          // Si requiere ID, extraerlo de los datos y construir la URL
+          if (requiresId && data && typeof data === "object" && data !== null) {
+            const dataObj = data as { id?: string | number };
+            if (dataObj.id !== undefined) {
+              requestUrl = `${url}/${String(dataObj.id)}`;
+            }
+          }
           
           if (data && (method === "POST" || method === "PUT")) {
             requestOptions.body = JSON.stringify(data);
           }
           
-          return await _handlerRequest(url, requestOptions);
+          return await _handlerRequest(requestUrl, requestOptions);
         } catch (error) {
           return _handleError(error as Error);
         }
@@ -146,9 +156,9 @@ export default function BackendProvider({ children }: BackendProviderProps) {
       appointments: {
         listar: _createEventRequest(APPOINTMENTS_ENDPOINT, "GET"),
         crear: _createEventRequest(APPOINTMENTS_ENDPOINT, "POST"),
-        modificar: _createEventRequest(APPOINTMENTS_ENDPOINT, "PUT"),
-        obtener: _createEventRequest(APPOINTMENTS_ENDPOINT, "GET"),
-        eliminar: _createEventRequest(APPOINTMENTS_ENDPOINT, "DELETE"),
+        modificar: _createEventRequest(APPOINTMENTS_ENDPOINT, "PUT", true),
+        obtener: _createEventRequest(APPOINTMENTS_ENDPOINT, "GET", true),
+        eliminar: _createEventRequest(APPOINTMENTS_ENDPOINT, "DELETE", true),
       },
       clients: {
         listar: _createEventRequest(CLIENTS_ENDPOINT, "GET"),

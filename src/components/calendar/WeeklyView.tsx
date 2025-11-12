@@ -33,9 +33,10 @@ interface WeeklyViewProps {
   } | null;
   organizationId?: string;
   onAppointmentCreated?: () => void;
+  onStatusChange?: (appointmentId: string, newStatus: Appointment["status"]) => void | Promise<void>;
 }
 
-function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmentCreated }: WeeklyViewProps) {
+function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmentCreated, onStatusChange }: WeeklyViewProps) {
   // Generar días de la semana basados en la configuración
   const generateDays = React.useCallback(() => {
     if (!calendarConfig) return [];
@@ -260,6 +261,7 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
                           appointments={appointments}
                           organizationId={organizationId}
                           onAppointmentCreated={onAppointmentCreated}
+                          onStatusChange={onStatusChange}
                         />
                       </div>
                     </div>
@@ -309,6 +311,7 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
                       appointments={appointments}
                       organizationId={organizationId}
                       onAppointmentCreated={onAppointmentCreated}
+                      onStatusChange={onStatusChange}
                     />
                   ))}
                 </div>
@@ -366,6 +369,7 @@ function WeeklyView({ appointments, calendarConfig, organizationId, onAppointmen
                       appointments={appointments}
                       organizationId={organizationId}
                       onAppointmentCreated={onAppointmentCreated}
+                      onStatusChange={onStatusChange}
                     />
                   );
                 })}

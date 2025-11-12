@@ -30,6 +30,7 @@ interface TimeSlotProps {
   dayDate: Date;
   organizationId?: string;
   onAppointmentCreated?: () => void;
+  onStatusChange?: (appointmentId: string, newStatus: Appointment["status"]) => void | Promise<void>;
 }
 
 function TimeSlot({ 
@@ -38,7 +39,8 @@ function TimeSlot({
   endHour, 
   dayDate, 
   organizationId,
-  onAppointmentCreated 
+  onAppointmentCreated,
+  onStatusChange
 }: TimeSlotProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -118,6 +120,24 @@ function TimeSlot({
                 }
               };
 
+              // Convertir el estado a español
+              const getStatusText = (status: string) => {
+                switch (status) {
+                  case "scheduled":
+                    return "Agendado";
+                  case "confirmed":
+                    return "Confirmado";
+                  case "in-progress":
+                    return "En Progreso";
+                  case "completed":
+                    return "Completado";
+                  case "cancelled":
+                    return "Cancelado";
+                  default:
+                    return status;
+                }
+              };
+
               return (
                 <div
                   key={index}
@@ -128,7 +148,7 @@ function TimeSlot({
                   <div className="font-medium truncate text-xs lg:text-sm">
                     {appointment.client?.name || appointment.clientName || 'Sin nombre'}
                   </div>
-                  <div className="text-xs opacity-75 hidden lg:block">{appointment.status}</div>
+                  <div className="text-xs opacity-75 hidden lg:block">{getStatusText(appointment.status)}</div>
                 </div>
               );
             })}
@@ -165,6 +185,7 @@ function TimeSlot({
           // Por ahora solo cerramos el modal
           setIsInfoModalOpen(false);
         }}
+        onStatusChange={onStatusChange}
       />
     </>
   );

@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import CalendarView from "@/components/calendar/CalendarView";
 import { useAuth } from "@/hooks/use-auth";
@@ -60,6 +61,36 @@ export default function CalendarPage() {
     fetchAppointments();
   }, [fetchAppointments]);
 
+  const handleStatusChange = useCallback(async (appointmentId: string, newStatus: AppointmentWithRelations["status"]) => {
+    try {
+      const response = await backendHandler.appointments.modificar({ id: appointmentId, status: newStatus });
+      if (response.success) {
+        toast.success("Estado actualizado correctamente");
+        await fetchAppointments(); // Refrescar la lista después del cambio
+      } else {
+        toast.error("Error al actualizar el estado");
+      }
+    } catch (error) {
+      console.error("Error updating appointment status:", error);
+      toast.error("Error al actualizar el estado");
+    }
+  }, [backendHandler.appointments.modificar, fetchAppointments]);
+
+  // Convertir appointments de Date a string para los componentes
+  const transformedAppointments = appointments.map((appointment) => ({
+    ...appointment,
+    startHour: appointment.startHour instanceof Date 
+      ? appointment.startHour.toISOString() 
+      : typeof appointment.startHour === "string" 
+        ? appointment.startHour 
+        : new Date(appointment.startHour).toISOString(),
+    endHour: appointment.endHour instanceof Date 
+      ? appointment.endHour.toISOString() 
+      : typeof appointment.endHour === "string" 
+        ? appointment.endHour 
+        : new Date(appointment.endHour).toISOString(),
+  }));
+
   return (
     <div>
       {loading ? (
@@ -69,10 +100,11 @@ export default function CalendarPage() {
       ) : (
         <div>
           <CalendarView 
-            appointments={appointments} 
+            appointments={transformedAppointments} 
             calendarConfig={calendarConfig}
             organizationId={(session as any)?.activeOrganizationId || "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5"}
             onAppointmentCreated={handleAppointmentCreated}
+            onStatusChange={handleStatusChange}
           />
         </div>
       )}
