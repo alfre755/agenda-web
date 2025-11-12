@@ -181,3 +181,21 @@ export const calendar_config = pgTable("calendar_config", {
     .notNull(),
 });
 
+export const organizationConfig = pgTable("organization_config", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id),
+  active: boolean("active").default(false).notNull(),
+  phoneNumberId: text("phone_number_id"),
+  wspToken: text("wsp_token"),
+  apiUrlList: text("api_url_list"),
+  apiKeyAgenda: text("api_key_agenda"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
