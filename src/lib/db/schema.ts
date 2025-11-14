@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -181,6 +182,18 @@ export const calendar_config = pgTable("calendar_config", {
     .notNull(),
 });
 
+export const conversationStatusEnum = pgEnum("conversation_status", [
+  "pendiente",
+  "confirmada",
+  "cancelada",
+]);
+
+export const wspMessageStatusEnum = pgEnum("wsp_message_status", [
+  "enviado",
+  "enviado_automatico",
+  "recibido",
+]);
+
 export const organizationConfig = pgTable("organization_config", {
   id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
   organizationId: text("organization_id")
@@ -191,6 +204,48 @@ export const organizationConfig = pgTable("organization_config", {
   wspToken: text("wsp_token"),
   apiUrlList: text("api_url_list"),
   apiKeyAgenda: text("api_key_agenda"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const conversation = pgTable("conversation", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  uuid: text("uuid")
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull()
+    .unique(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id),
+  appointmentId: bigint("appointment_id", { mode: "number" })
+    .references(() => appointment.id),
+  status: conversationStatusEnum("status").default("pendiente").notNull(), // pendiente, confirmada, cancelada
+  phoneNumber: text("phone_number"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const wspMessage = pgTable("wsp_message", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  uuid: text("uuid")
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull()
+    .unique(),
+  conversationId: bigint("conversation_id", { mode: "number" })
+    .notNull()
+    .references(() => conversation.id),
+  wspMessageId: text("wsp_message_id"),
+  sender: text("sender"),
+  content: text("content"),
+  status: wspMessageStatusEnum("status").default("enviado").notNull(), // enviado, enviado_automatico, recibido
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
