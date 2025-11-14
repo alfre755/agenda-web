@@ -199,8 +199,7 @@ Deno.serve(async (req)=>{
           const clientName = appointment.client?.name || "Cliente";
           // Construir mensaje (por ahora texto simple, luego se puede usar template)
           const messageText = `Hola ${clientName}, tienes una cita agendada para el ${fechaAppointment} a las ${horaAppointment}. Por favor confirma tu asistencia.`;
-          // Preparar payload para WhatsApp (template o texto simple)
-          // Por ahora usamos texto simple, pero se puede cambiar a template
+          // Preparar payload para WhatsApp template con botones
           const payload = {
             messaging_product: "whatsapp",
             to: normalizedPhone,
@@ -225,6 +224,28 @@ Deno.serve(async (req)=>{
                     {
                       type: "text",
                       text: horaAppointment
+                    }
+                  ]
+                },
+                {
+                  type: "button",
+                  sub_type: "quick_reply",
+                  index: "0",
+                  parameters: [
+                    {
+                      type: "payload",
+                      payload: `CONFIRM:${appointment.id}`
+                    }
+                  ]
+                },
+                {
+                  type: "button",
+                  sub_type: "quick_reply",
+                  index: "1",
+                  parameters: [
+                    {
+                      type: "payload",
+                      payload: `CANCEL:${appointment.id}`
                     }
                   ]
                 }
