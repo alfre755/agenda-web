@@ -204,6 +204,8 @@ export const organizationConfig = pgTable("organization_config", {
   wspToken: text("wsp_token"),
   apiUrlList: text("api_url_list"),
   apiKeyAgenda: text("api_key_agenda"),
+  imageUrl: text("image_url"),
+  verifyTokenMeta: text("verify_token_meta"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
