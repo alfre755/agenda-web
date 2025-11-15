@@ -278,14 +278,21 @@ Deno.serve(async (req)=>{
           const sentMsgId = messages?.[0]?.id ?? null;
           console.log(`✅ Mensaje enviado - Message ID: ${sentMsgId}`);
           // Crear conversación
-          const { data: conv, error: convErr } = await supabase.from("conversation").insert([
-            {
-              organization_id: organization_id,
-              appointment_id: appointment.id,
-              phone_number: normalizedPhone,
-              status: "pendiente"
-            }
-          ]).select("id").maybeSingle();
+          const { data: conv, error: convErr } = await supabase
+            .from("conversation")
+            .insert([
+              {
+                uuid: crypto.randomUUID(),
+                organization_id: organization_id,
+                appointment_id: appointment.id,
+                phone_number: normalizedPhone,
+                status: "pendiente",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              },
+            ])
+            .select("id")
+            .maybeSingle();
           if (convErr || !conv) {
             console.error(`❌ Error creando conversación para appointment ${appointment.id}:`, convErr);
             return {
@@ -301,12 +308,15 @@ Deno.serve(async (req)=>{
           // Guardar mensaje
           const { error: msgErr } = await supabase.from("wsp_message").insert([
             {
+              uuid: crypto.randomUUID(),
               conversation_id: conv.id,
               wsp_message_id: sentMsgId,
               sender: "system",
               content: messageText,
-              status: "enviado"
-            }
+              status: "enviado",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
           ]);
           if (msgErr) {
             console.error(`❌ Error guardando mensaje:`, msgErr);

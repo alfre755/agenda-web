@@ -161,11 +161,14 @@ Deno.serve(async (req) => {
         console.log("🚫 Conversación ya respondida, solo guardar mensaje");
 
         await supabase.from("wsp_message").insert({
+          uuid: crypto.randomUUID(),
           conversation_id: conv.id,
           wsp_message_id: m.id,
           sender: "paciente",
           content: userText,
           status: "recibido",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
 
         // Marcar como leído
@@ -193,11 +196,14 @@ Deno.serve(async (req) => {
 
         // Guardar mensaje del paciente
         await supabase.from("wsp_message").insert({
+          uuid: crypto.randomUUID(),
           conversation_id: conv.id,
           wsp_message_id: m.id,
           sender: "paciente",
           content: userText,
           status: "recibido",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
 
         // Responder automáticamente
@@ -222,11 +228,14 @@ Deno.serve(async (req) => {
         if (replyRes.ok) {
           const { messages } = await replyRes.json();
           await supabase.from("wsp_message").insert({
+            uuid: crypto.randomUUID(),
             conversation_id: conv.id,
             wsp_message_id: messages?.[0]?.id ?? null,
             sender: "system",
             content: respuesta.text.body,
             status: "enviado_automatico",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           });
         }
 
@@ -254,12 +263,16 @@ Deno.serve(async (req) => {
         console.log("🆕 No existe conversación, creando nueva");
 
         // Crear nueva conversación (sin appointment_id por ahora)
+        const now = new Date().toISOString();
         const { data: newConv, error: newConvErr } = await supabase
           .from("conversation")
           .insert({
+            uuid: crypto.randomUUID(),
             organization_id: ORGANIZATION_ID,
             phone_number: telefonoNorm,
             status: "pendiente",
+            created_at: now,
+            updated_at: now,
           })
           .select("id")
           .single();
@@ -309,20 +322,26 @@ Deno.serve(async (req) => {
           
           // Guardar mensaje de plantilla
           await supabase.from("wsp_message").insert({
+            uuid: crypto.randomUUID(),
             conversation_id: newConv.id,
             wsp_message_id: messages?.[0]?.id ?? null,
             sender: "system",
             content: "Hemos recibido tu mensaje correctamente. En breve, uno de nuestros colaboradores te responderá.",
             status: "enviado",
+            created_at: now,
+            updated_at: now,
           });
 
           // Guardar mensaje del paciente
           await supabase.from("wsp_message").insert({
+            uuid: crypto.randomUUID(),
             conversation_id: newConv.id,
             wsp_message_id: m.id,
             sender: "paciente",
             content: userText,
             status: "recibido",
+            created_at: now,
+            updated_at: now,
           });
         }
 
@@ -404,10 +423,22 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Actualizar appointment si existe (necesitarías un endpoint o acceso directo)
+      // Actualizar appointment si existe
       if (conv.appointment_id) {
-        // Aquí podrías actualizar el appointment en tu BD
-        // Por ahora solo actualizamos la conversación
+        const newStatus = estado === "confirmada" ? "scheduled" : "cancelled";
+        const { error: appointmentUpdateErr } = await supabase
+          .from("appointment")
+          .update({
+            status: newStatus,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", conv.appointment_id);
+
+        if (appointmentUpdateErr) {
+          console.error(`❌ Error actualizando appointment ${conv.appointment_id}:`, appointmentUpdateErr);
+        } else {
+          console.log(`✅ Appointment ${conv.appointment_id} actualizado a ${newStatus}`);
+        }
       }
 
       // Actualizar conversación
@@ -420,11 +451,14 @@ Deno.serve(async (req) => {
 
       // Guardar mensaje del botón
       await supabase.from("wsp_message").insert({
+        uuid: crypto.randomUUID(),
         conversation_id: conv.id,
         wsp_message_id: m.id,
         sender: "paciente",
         content: m.button?.text || action,
         status: "recibido",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       });
 
       // Responder confirmación
@@ -452,11 +486,14 @@ Deno.serve(async (req) => {
       if (replyRes.ok) {
         const { messages } = await replyRes.json();
         await supabase.from("wsp_message").insert({
+          uuid: crypto.randomUUID(),
           conversation_id: conv.id,
           wsp_message_id: messages?.[0]?.id ?? null,
           sender: "system",
           content: responseText,
           status: "enviado_automatico",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
       }
 

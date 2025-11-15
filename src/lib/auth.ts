@@ -29,21 +29,10 @@ async function getActiveOrganization(userId: string) {
       return userOrganization[0];
     }
 
-    // Si no tiene organizaciones, crear una por defecto o usar una existente
-    // Por ahora, retornar una organización por defecto
-    return {
-      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
-      name: "Default Organization",
-      slug: "default-org",
-    };
+    throw new Error("User has no organizations assigned");
   } catch (error) {
     console.error("Error getting user organization:", error);
-    // Fallback a organización por defecto
-    return {
-      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
-      name: "Default Organization", 
-      slug: "default-org",
-    };
+    throw error;
   }
 }
 
