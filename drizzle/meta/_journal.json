@@ -57,6 +57,34 @@
       "when": 1759801805275,
       "tag": "0007_lyrical_iron_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1762025186753,
+      "tag": "0008_bent_shiver_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1762916660952,
+      "tag": "0009_empty_sue_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1763081332836,
+      "tag": "0010_sudden_venom",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1763085634885,
+      "tag": "0011_violet_frog_thor",
+      "breakpoints": true
     }
   ]
 }

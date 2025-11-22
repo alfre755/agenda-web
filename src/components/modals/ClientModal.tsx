@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 
+import { ClientForm } from "@/components/forms/ClientForm";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import { ClientForm } from "@/components/forms/ClientForm";
 import { useBackend } from "@/hooks/use-backend-context";
 
 interface ClientModalProps {

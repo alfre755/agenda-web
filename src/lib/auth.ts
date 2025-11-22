@@ -2,10 +2,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { admin } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import { sendEmail } from "@/lib/mail";
 import { ac, roles } from "@/lib/permissions";
-import { eq } from "drizzle-orm";
 
 import { db } from "./db"; // your drizzle instance
 import { member, organization as organizationTable } from "./db/schema";
@@ -29,21 +29,10 @@ async function getActiveOrganization(userId: string) {
       return userOrganization[0];
     }
 
-    // Si no tiene organizaciones, crear una por defecto o usar una existente
-    // Por ahora, retornar una organización por defecto
-    return {
-      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
-      name: "Default Organization",
-      slug: "default-org",
-    };
+    throw new Error("User has no organizations assigned");
   } catch (error) {
     console.error("Error getting user organization:", error);
-    // Fallback a organización por defecto
-    return {
-      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
-      name: "Default Organization", 
-      slug: "default-org",
-    };
+    throw error;
   }
 }
 

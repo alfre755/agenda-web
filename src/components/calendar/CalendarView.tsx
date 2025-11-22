@@ -8,7 +8,7 @@ interface Appointment {
   id: string;
   startHour: string;
   endHour: string;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   client?: {
     name: string;
@@ -33,6 +33,7 @@ interface CalendarViewProps {
   } | null;
   organizationId?: string;
   onAppointmentCreated?: () => void;
+  onStatusChange?: (appointmentId: string, newStatus: Appointment["status"]) => void | Promise<void>;
 }
 
 export default function CalendarView({
@@ -40,6 +41,7 @@ export default function CalendarView({
   calendarConfig,
   organizationId,
   onAppointmentCreated,
+  onStatusChange,
 }: CalendarViewProps) {
  
   return (
@@ -51,6 +53,7 @@ export default function CalendarView({
           calendarConfig={calendarConfig}
           organizationId={organizationId}
           onAppointmentCreated={onAppointmentCreated}
+          onStatusChange={onStatusChange}
         />
       </div>
     </div>

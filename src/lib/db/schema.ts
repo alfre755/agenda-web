@@ -1,9 +1,10 @@
 import {
+  bigint,
   boolean,
+  pgEnum,
   pgTable,
   text,
   timestamp,
-  bigint,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -145,7 +146,7 @@ export const appointment = pgTable("appointment", {
     .references(() => client.id),
   startHour: timestamp("start_hour").notNull(),
   endHour: timestamp("end_hour").notNull(),
-  status: text("status").default("in-progress").notNull(), // in-progress, completed, cancelled
+  status: text("status").default("scheduled").notNull(), // scheduled, confirmed, in-progress, completed, cancelled
   observation: text("observation"),
   organizationId: text("organization_id")
     .notNull()
@@ -173,6 +174,80 @@ export const calendar_config = pgTable("calendar_config", {
   createdById: text("created_by_id")
     .notNull()
     .references(() => user.id),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const conversationStatusEnum = pgEnum("conversation_status", [
+  "pendiente",
+  "confirmada",
+  "cancelada",
+]);
+
+export const wspMessageStatusEnum = pgEnum("wsp_message_status", [
+  "enviado",
+  "enviado_automatico",
+  "recibido",
+]);
+
+export const organizationConfig = pgTable("organization_config", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id),
+  active: boolean("active").default(false).notNull(),
+  phoneNumberId: text("phone_number_id"),
+  wspToken: text("wsp_token"),
+  apiUrlList: text("api_url_list"),
+  apiKeyAgenda: text("api_key_agenda"),
+  imageUrl: text("image_url"),
+  verifyTokenMeta: text("verify_token_meta"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const conversation = pgTable("conversation", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  uuid: text("uuid")
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull()
+    .unique(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id),
+  appointmentId: bigint("appointment_id", { mode: "number" })
+    .references(() => appointment.id),
+  status: conversationStatusEnum("status").default("pendiente").notNull(), // pendiente, confirmada, cancelada
+  phoneNumber: text("phone_number"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const wspMessage = pgTable("wsp_message", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  uuid: text("uuid")
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull()
+    .unique(),
+  conversationId: bigint("conversation_id", { mode: "number" })
+    .notNull()
+    .references(() => conversation.id),
+  wspMessageId: text("wsp_message_id"),
+  sender: text("sender"),
+  content: text("content"),
+  status: wspMessageStatusEnum("status").default("enviado").notNull(), // enviado, enviado_automatico, recibido
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

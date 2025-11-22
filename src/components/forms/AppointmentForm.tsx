@@ -1,8 +1,9 @@
 "use client";
 
-import { z } from "zod";
-import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
+import { useCallback,useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
+
 import { AppButton } from "@/components/AppButton";
 import {
   Form,
@@ -13,7 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,9 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useBackend } from "@/hooks/use-backend-context";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { formatRut } from "@/lib/utils";
-import { useBackend } from "@/hooks/use-backend-context";
 
 const schema = z.object({
   clientRut: z
@@ -37,7 +38,7 @@ const schema = z.object({
   clientEmail: z.string().email("Email inválido").optional().or(z.literal("")),
   clientPhone: z.string().optional(),
   observation: z.string().optional(),
-  status: z.enum(["in-progress", "completed", "cancelled"]),
+  status: z.enum(["scheduled", "confirmed", "in-progress", "completed", "cancelled"]),
 });
 
 type Schema = z.infer<typeof schema>;
@@ -73,7 +74,7 @@ export function AppointmentForm({
       clientEmail: "",
       clientPhone: "",
       observation: "",
-      status: "in-progress" as const,
+      status: "scheduled" as const,
       ...defaultValues,
     },
   });
@@ -282,6 +283,8 @@ export function AppointmentForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="scheduled">Agendado</SelectItem>
+                  <SelectItem value="confirmed">Confirmado</SelectItem>
                   <SelectItem value="in-progress">En Progreso</SelectItem>
                   <SelectItem value="completed">Completado</SelectItem>
                   <SelectItem value="cancelled">Cancelado</SelectItem>

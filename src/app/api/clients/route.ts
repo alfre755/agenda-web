@@ -1,6 +1,7 @@
+import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { client } from "@/lib/db/schema";

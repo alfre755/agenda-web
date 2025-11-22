@@ -1,7 +1,9 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useCallback,useState } from "react";
+
+import type { AppointmentFilters, CreateAppointmentData, UpdateAppointmentData } from "@/types/appointments";
+
 import { useBackend } from "./use-backend-context";
-import { AppointmentWithRelations, AppointmentFilters, CreateAppointmentData, UpdateAppointmentData } from "@/types/appointments";
 
 export function useAppointments() {
   const backend = useBackend();
@@ -104,7 +106,7 @@ export function useAppointments() {
 
   const updateAppointmentStatus = useCallback(async (
     appointmentId: string,
-    status: "in-progress" | "completed" | "cancelled"
+    status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled"
   ) => {
     return updateAppointment({
       id: appointmentId,

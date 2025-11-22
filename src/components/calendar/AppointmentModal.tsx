@@ -3,6 +3,8 @@
 import React from "react";
 import { toast } from "sonner";
 
+import { AppointmentForm } from "@/components/forms/AppointmentForm";
+import { ClientModal } from "@/components/modals/ClientModal";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import { AppointmentForm } from "@/components/forms/AppointmentForm";
-import { ClientModal } from "@/components/modals/ClientModal";
 import { useAppointments } from "@/hooks/use-appointments";
 import { useBackend } from "@/hooks/use-backend-context";
 import type { CreateAppointmentData } from "@/types/appointments";
@@ -47,7 +46,7 @@ export function AppointmentModal({
     clientEmail?: string;
     clientPhone?: string;
     observation?: string;
-    status: "in-progress" | "completed" | "cancelled";
+    status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   }) => {
     try {
       // Crear las fechas de inicio y fin del appointment

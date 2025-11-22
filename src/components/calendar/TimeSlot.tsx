@@ -9,7 +9,7 @@ interface Appointment {
   id: string;
   startHour: string;
   endHour: string;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   client?: {
     name: string;
@@ -30,6 +30,7 @@ interface TimeSlotProps {
   dayDate: Date;
   organizationId?: string;
   onAppointmentCreated?: () => void;
+  onStatusChange?: (appointmentId: string, newStatus: Appointment["status"]) => void | Promise<void>;
 }
 
 function TimeSlot({ 
@@ -38,7 +39,8 @@ function TimeSlot({
   endHour, 
   dayDate, 
   organizationId,
-  onAppointmentCreated 
+  onAppointmentCreated,
+  onStatusChange
 }: TimeSlotProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -103,14 +105,36 @@ function TimeSlot({
               // Determinar el color según el estado
               const getStatusColor = (status: string) => {
                 switch (status) {
-                  case "in-progress":
+                  case "scheduled":
+                    return "bg-yellow-100 text-yellow-800";
+                  case "confirmed":
                     return "bg-blue-100 text-blue-800";
+                  case "in-progress":
+                    return "bg-purple-100 text-purple-800";
                   case "completed":
                     return "bg-green-100 text-green-800";
                   case "cancelled":
                     return "bg-red-100 text-red-800";
                   default:
                     return "bg-gray-100 text-gray-800";
+                }
+              };
+
+              // Convertir el estado a español
+              const getStatusText = (status: string) => {
+                switch (status) {
+                  case "scheduled":
+                    return "Agendado";
+                  case "confirmed":
+                    return "Confirmado";
+                  case "in-progress":
+                    return "En Progreso";
+                  case "completed":
+                    return "Completado";
+                  case "cancelled":
+                    return "Cancelado";
+                  default:
+                    return status;
                 }
               };
 
@@ -124,7 +148,7 @@ function TimeSlot({
                   <div className="font-medium truncate text-xs lg:text-sm">
                     {appointment.client?.name || appointment.clientName || 'Sin nombre'}
                   </div>
-                  <div className="text-xs opacity-75 hidden lg:block">{appointment.status}</div>
+                  <div className="text-xs opacity-75 hidden lg:block">{getStatusText(appointment.status)}</div>
                 </div>
               );
             })}
@@ -161,6 +185,7 @@ function TimeSlot({
           // Por ahora solo cerramos el modal
           setIsInfoModalOpen(false);
         }}
+        onStatusChange={onStatusChange}
       />
     </>
   );
