@@ -1,8 +1,11 @@
 "use client";
 
+import { Calendar, Clock, FileText,Mail, Phone, User } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,15 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User, Mail, Phone, FileText } from "lucide-react";
 
 interface Appointment {
   id: string;
   startHour: string;
   endHour: string;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   client?: {
     name: string;
@@ -38,6 +38,7 @@ interface AppointmentInfoModalProps {
   appointment: Appointment | null;
   onEdit?: (appointment: Appointment) => void;
   onDelete?: (appointmentId: string) => void;
+  onStatusChange?: (appointmentId: string, newStatus: Appointment["status"]) => void | Promise<void>;
 }
 
 export function AppointmentInfoModal({
@@ -46,13 +47,18 @@ export function AppointmentInfoModal({
   appointment,
   onEdit,
   onDelete,
+  onStatusChange,
 }: AppointmentInfoModalProps) {
   if (!appointment) return null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "in-progress":
+      case "scheduled":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "confirmed":
         return "bg-blue-100 text-blue-800 border-blue-200";
+      case "in-progress":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       case "completed":
         return "bg-green-100 text-green-800 border-green-200";
       case "cancelled":
@@ -64,6 +70,10 @@ export function AppointmentInfoModal({
 
   const getStatusText = (status: string) => {
     switch (status) {
+      case "scheduled":
+        return "Agendado";
+      case "confirmed":
+        return "Confirmado";
       case "in-progress":
         return "En Progreso";
       case "completed":
@@ -106,10 +116,53 @@ export function AppointmentInfoModal({
         await onDelete(appointment.id);
         toast.success("Cita eliminada exitosamente");
         onClose();
-      } catch (error) {
+      } catch {
         toast.error("Error al eliminar la cita");
       }
     }
+  };
+
+  // Función para obtener el siguiente estado posible
+  const getNextStatus = (currentStatus: Appointment["status"]): Appointment["status"] | null => {
+    switch (currentStatus) {
+      case "scheduled":
+        return "confirmed";
+      case "confirmed":
+        return "in-progress";
+      case "in-progress":
+        return "completed";
+      default:
+        return null;
+    }
+  };
+
+  // Función para obtener el botón de estado siguiente
+  const getStatusButton = () => {
+    const nextStatus = getNextStatus(appointment.status);
+    if (!nextStatus || !onStatusChange) return null;
+
+    const buttonLabels: Record<string, string> = {
+      "confirmed": "Confirmar Cita",
+      "in-progress": "Iniciar Atención",
+      "completed": "Finalizar Cita",
+    };
+
+    return (
+      <Button
+        variant="default"
+        onClick={async () => {
+          try {
+            await onStatusChange(appointment.id, nextStatus);
+            toast.success(`Estado cambiado a ${getStatusText(nextStatus)}`);
+            onClose();
+          } catch {
+            toast.error("Error al cambiar el estado");
+          }
+        }}
+      >
+        {buttonLabels[nextStatus] || "Siguiente Estado"}
+      </Button>
+    );
   };
 
   return (
@@ -208,6 +261,7 @@ export function AppointmentInfoModal({
             <Button variant="outline" onClick={onClose}>
               Cerrar
             </Button>
+            {getStatusButton()}
             {onEdit && (
               <Button variant="outline" onClick={handleEdit}>
                 Editar

@@ -5,7 +5,7 @@ export const CreateAppointmentSchema = z.object({
   clientRut: z.string().min(1, "RUT del cliente es requerido"),
   startHour: z.string().datetime("Fecha de inicio inválida"),
   endHour: z.string().datetime("Fecha de fin inválida"),
-  status: z.enum(["in-progress", "completed", "cancelled"]).default("in-progress"),
+  status: z.enum(["scheduled", "confirmed", "in-progress", "completed", "cancelled"]).default("scheduled"),
   observation: z.string().optional(),
   organizationId: z.string().min(1, "Organization ID es requerido"),
   createdById: z.string().optional(),
@@ -25,7 +25,7 @@ export interface AppointmentWithRelations {
   clientId: string;
   startHour: Date;
   endHour: Date;
-  status: "in-progress" | "completed" | "cancelled";
+  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "cancelled";
   observation?: string;
   organizationId: string;
   createdById?: string;

@@ -2,10 +2,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { admin } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import { sendEmail } from "@/lib/mail";
 import { ac, roles } from "@/lib/permissions";
-import { eq } from "drizzle-orm";
 
 import { db } from "./db"; // your drizzle instance
 import { member, organization as organizationTable } from "./db/schema";
@@ -29,29 +29,18 @@ async function getActiveOrganization(userId: string) {
       return userOrganization[0];
     }
 
-    // Si no tiene organizaciones, crear una por defecto o usar una existente
-    // Por ahora, retornar una organización por defecto
-    return {
-      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
-      name: "Default Organization",
-      slug: "default-org",
-    };
+    throw new Error("User has no organizations assigned");
   } catch (error) {
     console.error("Error getting user organization:", error);
-    // Fallback a organización por defecto
-    return {
-      id: "7eeGNeUgtTOFoaZFOpqadmipluFzPdG5",
-      name: "Default Organization", 
-      slug: "default-org",
-    };
+    throw error;
   }
 }
 
+const baseURL = process.env.BETTER_AUTH_URL || process.env.BASE_URL || "http://localhost:3000";
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || process.env.BASE_URL || "http://localhost:3000",
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || process.env.BASE_URL || "http://localhost:3000"
-  ],
+  baseURL,
+  trustedOrigins: [baseURL],
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({ to: user.email, subject: "Verify your email", text: `Click to verify: ${url}` });
@@ -80,6 +69,7 @@ export const auth = betterAuth({
     autoSignIn: false,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
+      console.warn("[AUTH DEBUG] Reset password URL received:", url);
       await sendEmail({ to: user.email, subject: "Reset your password", text: `Click to reset: ${url}` });
     },
     onPasswordReset: async ({ user }) => {
